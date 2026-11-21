@@ -1,0 +1,12 @@
+{
+  "name": "academic-groups-platform",
+  "version": "1.0.0",
+  "description": "منصة المجموعات والتكليفات الأكاديمية لمقرري التعليم الإلكتروني والتفكير النقدي",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["education", "groups", "assignments"],
+  "author": "",
+  "license": "ISC"
+}

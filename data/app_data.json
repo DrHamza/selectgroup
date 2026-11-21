@@ -1,0 +1,191 @@
+{
+  "settings": {
+    "adminPassword": "admin",
+    "courses": {
+      "elearning": {
+        "id": "elearning",
+        "name": "التعليم الإلكتروني",
+        "isOpen": true
+      },
+      "critical_thinking": {
+        "id": "critical_thinking",
+        "name": "التفكير النقدي",
+        "isOpen": true
+      }
+    },
+    "maxGroupSize": 10,
+    "allowMixedSections": true
+  },
+  "studentPhones": {},
+  "activities": [
+    {
+      "id": "act_elearning_1",
+      "courseId": "elearning",
+      "title": "النشاط الجماعي الأول: تصميم بيئات التعلم الرقمي التفاعلية",
+      "description": "اختيار موضوع من قائمة الموضوعات المحددة، وإعداد دراسة تطبيقية وتصميم نموذج تعليمي مع عرض تقديمي.",
+      "topics": [
+        {
+          "id": "top_el_1",
+          "title": "الموضوع 1: تطبيقات الذكاء الاصطناعي التوليدي في إنتاج المحتوى التعليمي",
+          "description": "تحليل أدوات AI في تصميم الدروس والاختبارات التفاعلية وتطبيقاتها العملية.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_2",
+          "title": "الموضوع 2: منصات التعلم التكيفي (Adaptive Learning) وتفريد التعليم",
+          "description": "استراتيجيات تكييف المسار التعليمي وفق قدرات وسرعة تعلم كل طالب.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_3",
+          "title": "الموضوع 3: التلعيب (Gamification) وتحفيز المشاركة في الفصول الافتراضية",
+          "description": "بناء سيناريو تعليمي متكامل يعتمد الشارات والنقاط ولوحات الشرف لرفع دافعية الطلاب.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_4",
+          "title": "الموضوع 4: تصميم بيئات الواقع المعزز والافتراضي (AR/VR) في التعليم",
+          "description": "استكشاف إمكانات الواقع المدمج في تبسيط المفاهيم المجردة والتجارب المعملية الافتراضية.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_5",
+          "title": "الموضوع 5: التصميم الشامل للتعلم (UDL) ومعايير سهولة الوصول الرقمي",
+          "description": "مبادئ تصميم محتوى إلكتروني ميسر وشامل لكافة الطلاب بما فيهم ذوو الاحتياجات الخاصة.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_6",
+          "title": "الموضوع 6: التقويم الإلكتروني الأصيل وبنوك الأسئلة التكيفية",
+          "description": "آليات القياس والتقويم المستمر في البيئات الرقمية ومكافحة الانتحال الرقمي.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_7",
+          "title": "الموضوع 7: التعلم المصغر (Microlearning) عبر الأجهزة الذكية",
+          "description": "تصميم كبسولات تعليمية رقمية سريعة وموجهة للمتعلمين عبر منصات الهواتف.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_el_8",
+          "title": "الموضوع 8: مجتمعات التعلم المهنية الافتراضية (VPLCs) والتعلم التشاركي",
+          "description": "توظيف أدوات التعاون الرقمي في تدريب المعلمين وتبادل الخبرات التدريسية.",
+          "reservedByGroupId": null
+        }
+      ]
+    },
+    {
+      "id": "act_critical_1",
+      "courseId": "critical_thinking",
+      "title": "النشاط الجماعي الأول: مهارات التفكير النقدي وتفكيك المشكلات المعاصرة",
+      "description": "تحليل قضية تربوية أو مجتمعية، تفكيك الحجج والمغالطات المنطقية، وتقديم بدائل مبنية على التفكير المنهجي.",
+      "topics": [
+        {
+          "id": "top_ct_1",
+          "title": "الموضوع 1: تحليل وتفكيك المغالطات المنطقية في الإعلام الرقمي",
+          "description": "رصد وتحليل المغالطات الأكثر شيوعاً في وسائل التواصل وتأثيرها على الرأي العام.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_ct_2",
+          "title": "الموضوع 2: التفكير الناقد والتمييز بين الحقائق والآراء والادعاءات الزائفة",
+          "description": "بناء دليل عملي للتحقق من مصداقية المعلومات والمصادر الرقمية.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_ct_3",
+          "title": "الموضوع 3: التفكير الإبداعي وحل المشكلات بطرق غير نمطية (القبعات الست)",
+          "description": "تطبيق استراتيجية القبعات الست للتفكير لمعالجة تحدٍ تربوي واقعي.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_ct_4",
+          "title": "الموضوع 4: استراتيجيات اتخاذ القرار في المواقف المعقدة المبنية على الأدلة",
+          "description": "أطر التقييم المنهجي للبدائل واختيار القرار الأكثر كفاءة وعقلانية.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_ct_5",
+          "title": "الموضوع 5: التفكير فوق المعرفي (Metacognition) ومراقبة الذات في التعلم",
+          "description": "كيف يطور الطالب وعيه بآليات تفكيره ونقاط ضعفه التحليلية وتصويبها.",
+          "reservedByGroupId": null
+        },
+        {
+          "id": "top_ct_6",
+          "title": "الموضوع 6: الحوار الفلسفي والمناظرة القائمة على الحجة والبرهان",
+          "description": "قواعد وأصول المناظرة العقلانية وبناء الحجج المقنعة وتفنيد الحجج المضادة.",
+          "reservedByGroupId": null
+        }
+      ]
+    }
+  ],
+  "presentationSlots": [
+    {
+      "id": "slot_el_1",
+      "courseId": "elearning",
+      "title": "السبت 28 نوفمبر 2026 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_el_2",
+      "courseId": "elearning",
+      "title": "السبت 5 ديسمبر 2026 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_el_3",
+      "courseId": "elearning",
+      "title": "السبت 12 ديسمبر 2026 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_el_4",
+      "courseId": "elearning",
+      "title": "السبت 19 ديسمبر 2026 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_el_5",
+      "courseId": "elearning",
+      "title": "السبت 26 ديسمبر 2026 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_el_6",
+      "courseId": "elearning",
+      "title": "السبت 2 يناير 2027 — قاعة المحاضرات (من 10 إلى 12)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_ct_1",
+      "courseId": "critical_thinking",
+      "title": "السبت 28 نوفمبر 2026 — جلسة العرض والمناقشة 1 (من 12 إلى 2)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_ct_2",
+      "courseId": "critical_thinking",
+      "title": "السبت 5 ديسمبر 2026 — جلسة العرض والمناقشة 2 (من 12 إلى 2)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_ct_3",
+      "courseId": "critical_thinking",
+      "title": "السبت 12 ديسمبر 2026 — جلسة العرض والمناقشة 3 (من 12 إلى 2)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_ct_4",
+      "courseId": "critical_thinking",
+      "title": "السبت 19 ديسمبر 2026 — جلسة العرض والمناقشة 4 (من 12 إلى 2)",
+      "reservedByGroupId": null
+    },
+    {
+      "id": "slot_ct_5",
+      "courseId": "critical_thinking",
+      "title": "السبت 26 ديسمبر 2026 — جلسة العرض والمناقشة 5 (من 12 إلى 2)",
+      "reservedByGroupId": null
+    }
+  ],
+  "groups": []
+}
