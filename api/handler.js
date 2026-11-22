@@ -269,13 +269,44 @@ async function handleApi(req, res) {
         isOpen: true
       };
 
-      const activities = (appData.activities || []).filter(a => a.courseId === courseId);
-      const presentationSlots = (appData.presentationSlots || []).filter(s => s.courseId === courseId);
-
       // Find my group
       const myGroup = (appData.groups || []).find(g => 
         g.courseId === courseId && g.members.some(m => m.studentId === studentId)
       );
+      const isApproved = myGroup && myGroup.isApprovedByTeacher;
+
+      // Gate activity details until group is approved by the professor
+      const activities = (appData.activities || []).filter(a => a.courseId === courseId).map(a => {
+        if (!isApproved) {
+          return {
+            id: a.id,
+            courseId: a.courseId,
+            title: a.title,
+            isLocked: true,
+            description: null,
+            executionSteps: null,
+            submissionGuidelines: null,
+            lockMessage: 'لا تظهر تفاصيل النشاط وتوجيهات التنفيذ وكيفية التسليم إلا بعد اكتمال المجموعة واعتمادها رسمياً من أستاذ المقرر د. حمزة محمد القصبي.',
+            topics: (a.topics || []).map(t => ({ id: t.id, title: t.title, reservedByGroupId: t.reservedByGroupId }))
+          };
+        }
+        return {
+          ...a,
+          isLocked: false,
+          executionSteps: a.executionSteps || [
+            "اختيار موضوع محدد للتكليف من قائمة الموضوعات المعتمدة أدناه بعد اكتمال المجموعة واعتمادها.",
+            "التنسيق المشترك بين كافة أعضاء المجموعة وتقسيم محاور العمل والمهام التطبيقية بالتساوي.",
+            "إعداد دراسة متعمقة وتصميم نموذج تعليمي أو تطبيقي متكامل وفق معايير الجودة الأكاديمية."
+          ],
+          submissionGuidelines: a.submissionGuidelines || [
+            "إعداد ملف العرض التقديمي بصيغة (PowerPoint / PDF) وتضمين بيانات وأسماء جميع أعضاء المجموعة والفرقة والشعبة.",
+            "حجز موعد العرض والمناقشة الجماعية المتاح في جدول المواعيد أدناه.",
+            "المناقشة التفاعلية وعرض النموذج العملي أمام أستاذ المقرر (د. حمزة محمد القصبي) والزملاء في المحاضرة."
+          ]
+        };
+      });
+
+      const presentationSlots = (appData.presentationSlots || []).filter(s => s.courseId === courseId);
 
       let groupSummary = null;
       if (myGroup) {
@@ -642,6 +673,18 @@ async function handleApi(req, res) {
       if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
 
       group.isApprovedByTeacher = true;
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, group });
+    }
+
+    if (pathname === '/api/admin/unapprove-group' && method === 'POST') {
+      const { token, groupId } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      group.isApprovedByTeacher = false;
       await saveAppData(appData);
       return sendJson(res, 200, { success: true, group });
     }
