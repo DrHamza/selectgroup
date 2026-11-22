@@ -1,7 +1,7 @@
 {
   "settings": {
     "adminUsername": "drhamza",
-    "adminPassword": "admin2027",
+    "adminPassword": "HSam@2027",
     "courses": {
       "elearning": {
         "id": "elearning",
@@ -17,7 +17,12 @@
     "maxGroupSize": 10,
     "allowMixedSections": true
   },
-  "studentPhones": {},
+  "studentPhones": {
+    "300260001951": "01012345678"
+  },
+  "studentJobs": {
+    "300260001951": "معلم لغة عربية"
+  },
   "activities": [
     {
       "id": "act_elearning_1",

@@ -126,6 +126,46 @@ function parseBody(req) {
   });
 }
 
+// Robust Pathname Extractor (Works with Vercel rewrites, headers, query and direct server)
+function extractPathname(req) {
+  const parsedUrl = url.parse(req.url, true);
+
+  // 1. Check if rewrite passed __route in query (e.g. from vercel.json)
+  if (parsedUrl.query && parsedUrl.query.__route) {
+    let r = parsedUrl.query.__route;
+    if (!r.startsWith('/')) r = '/' + r;
+    if (!r.startsWith('/api')) r = '/api' + r;
+    return r.replace(/\/+$/, '');
+  }
+
+  // 2. Check x-vercel-original-url header
+  if (req.headers && req.headers['x-vercel-original-url']) {
+    const orig = url.parse(req.headers['x-vercel-original-url']).pathname;
+    if (orig && orig !== '/api/index.js' && orig !== '/api') return orig.replace(/\/+$/, '');
+  }
+
+  // 3. Check x-matched-path header
+  if (req.headers && req.headers['x-matched-path']) {
+    const matched = req.headers['x-matched-path'];
+    if (matched && matched !== '/api/index.js' && matched !== '/api') return matched.replace(/\/+$/, '');
+  }
+
+  // 4. Check x-forwarded-uri header
+  if (req.headers && req.headers['x-forwarded-uri']) {
+    const fwd = url.parse(req.headers['x-forwarded-uri']).pathname;
+    if (fwd && fwd !== '/api/index.js' && fwd !== '/api') return fwd.replace(/\/+$/, '');
+  }
+
+  // 5. Check [...slug] query from Vercel native catch-all
+  if (parsedUrl.query && parsedUrl.query.slug) {
+    const slugArr = Array.isArray(parsedUrl.query.slug) ? parsedUrl.query.slug : [parsedUrl.query.slug];
+    return ('/api/' + slugArr.join('/')).replace(/\/+$/, '');
+  }
+
+  // 6. Direct req.url
+  return (parsedUrl.pathname || '/').replace(/\/+$/, '');
+}
+
 // Master Request Handler
 async function handleApi(req, res) {
   if (req.method === 'OPTIONS') {
@@ -137,7 +177,7 @@ async function handleApi(req, res) {
   }
 
   const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname.replace(/\/+$/, '') || '/';
+  const pathname = extractPathname(req);
   const method = req.method;
   const appData = await getAppData();
 
@@ -152,6 +192,7 @@ async function handleApi(req, res) {
       const body = await parseBody(req);
       const studentId = String(body.studentId || '').trim();
       const phone = String(body.phone || '').trim();
+      const job = String(body.job || '').trim();
       const courseId = body.courseId || 'elearning';
 
       if (!studentId) {
@@ -176,9 +217,20 @@ async function handleApi(req, res) {
         return sendJson(res, 403, { error: 'عذراً، التسجيل في هذا المقرر مغلق حالياً بقرار من أستاذ المقرر' });
       }
 
+      let dataChanged = false;
       if (phone) {
         if (!appData.studentPhones) appData.studentPhones = {};
         appData.studentPhones[studentId] = phone;
+        dataChanged = true;
+      }
+
+      if (job) {
+        if (!appData.studentJobs) appData.studentJobs = {};
+        appData.studentJobs[studentId] = job;
+        dataChanged = true;
+      }
+
+      if (dataChanged) {
         await saveAppData(appData);
       }
 
@@ -522,7 +574,7 @@ async function handleApi(req, res) {
       const p = String(password || '').trim();
 
       const validUsernames = ['drhamza', 'admin'];
-      const currentAdminPassword = appData.settings?.adminPassword || 'admin2027';
+      const currentAdminPassword = appData.settings?.adminPassword || 'HSam@2027';
 
       if (!validUsernames.includes(u) || p !== currentAdminPassword) {
         return sendJson(res, 401, { error: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
@@ -543,7 +595,7 @@ async function handleApi(req, res) {
         return sendJson(res, 403, { error: 'غير مصرح' });
       }
 
-      const currentAdminPassword = appData.settings?.adminPassword || 'admin2027';
+      const currentAdminPassword = appData.settings?.adminPassword || 'HSam@2027';
       if (currentPassword !== currentAdminPassword) {
         return sendJson(res, 400, { error: 'كلمة المرور الحالية غير صحيحة' });
       }
@@ -571,7 +623,8 @@ async function handleApi(req, res) {
         activities: appData.activities || [],
         presentationSlots: appData.presentationSlots || [],
         groups: appData.groups || [],
-        studentPhones: appData.studentPhones || {}
+        studentPhones: appData.studentPhones || {},
+        studentJobs: appData.studentJobs || {}
       });
     }
 
@@ -695,13 +748,14 @@ async function handleApi(req, res) {
       const courseId = parsedUrl.query.courseId || 'elearning';
 
       let csv = '\uFEFF';
-      csv += 'رقم المجموعة,حالة الاعتماد,الموضوع المسند,موعد العرض في المحاضرة,اسم القائد,رقم الطالب,اسم الطالب,الصفة,الحالة,رقم الواتساب (لأستاذ المقرر فقط),الشعبة,المسار / الدبلوم,توجيهات أستاذ المقرر\n';
+      csv += 'رقم المجموعة,حالة الاعتماد,الموضوع المسند,موعد العرض في المحاضرة,اسم القائد,رقم الطالب,اسم الطالب,الوظيفة (لأستاذ المقرر فقط),الصفة,الحالة,رقم الواتساب (لأستاذ المقرر فقط),الشعبة,المسار / الدبلوم,توجيهات أستاذ المقرر\n';
 
       const cGroups = (appData.groups || []).filter(g => g.courseId === courseId);
       for (const g of cGroups) {
         for (const m of g.members) {
           const s = studentsById.get(m.studentId);
           const phone = (appData.studentPhones || {})[m.studentId] || 'غير مسجل';
+          const job = (appData.studentJobs || {})[m.studentId] || 'غير مسجل';
           const track = s ? `"${(s.track || '').replace(/"/g, '""')}"` : '""';
           const notes = `"${(g.teacherNotes || '').replace(/"/g, '""')}"`;
           const topic = `"${(g.topicTitle || '').replace(/"/g, '""')}"`;
@@ -710,7 +764,7 @@ async function handleApi(req, res) {
           const status = m.status === 'confirmed' ? 'مؤكد' : 'في انتظار الموافقة';
           const approval = g.isApprovedByTeacher ? 'معتمدة نهائياً' : 'قيد المراجعة';
 
-          csv += `${g.groupNumber},"${approval}",${topic},${slot},"${g.leaderName}",${m.studentId},"${m.name}",${role},${status},"${phone}","${m.section}",${track},${notes}\n`;
+          csv += `${g.groupNumber},"${approval}",${topic},${slot},"${g.leaderName}",${m.studentId},"${m.name}","${job}",${role},${status},"${phone}","${m.section}",${track},${notes}\n`;
         }
       }
 
@@ -723,11 +777,11 @@ async function handleApi(req, res) {
     }
 
     // 404 for unknown API
-    sendJson(res, 404, { error: 'المسار البرمجي غير موجود' });
+    sendJson(res, 404, { error: 'المسار البرمجي غير موجود', requestedPath: pathname });
   } catch (err) {
     console.error('API Error:', err);
     sendJson(res, 500, { error: 'حدث خطأ في معالجة الطلب' });
   }
 }
 
-module.exports = { handleApi };
+module.exports = { handleApi, extractPathname };

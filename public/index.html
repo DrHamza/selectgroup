@@ -53,28 +53,60 @@
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Logo & Title -->
+      <!-- Logo, Title & Faculty -->
       <div class="flex items-center gap-3 sm:gap-4 cursor-pointer" onclick="navigate('home')">
         <div class="relative flex items-center justify-center">
           <img id="header-logo-light" src="logo_dark.png" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain dark:hidden transition-transform hover:scale-105">
           <img id="header-logo-dark" src="logo_white.png" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain hidden dark:block transition-transform hover:scale-105">
         </div>
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <h1 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">منصة المجموعات والتكليفات الأكاديمية</h1>
-            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
-              جامعة القاهرة
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
+              كلية الدراسات العليا للتربية - جامعة القاهرة
             </span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">إشراف: <span class="font-bold text-emerald-600 dark:text-emerald-400">د. حمزة محمد القصبي</span></p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            إشراف: <span class="font-bold text-emerald-600 dark:text-emerald-400">د. حمزة محمد القصبي</span>
+          </p>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Social / Contact Links for profhksby & Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        
+        <!-- profhksby Social Channels Bar -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">
+          <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 ml-1 hidden sm:inline">أستاذ المقرر:</span>
+          
+          <!-- Telegram -->
+          <a href="https://t.me/profhksby" target="_blank" rel="noopener noreferrer" title="تليجرام د. حمزة القصبي (@profhksby)"
+            class="w-8 h-8 rounded-xl bg-sky-500/10 hover:bg-sky-500 text-sky-600 hover:text-white flex items-center justify-center text-sm transition">
+            <i class="fa-brands fa-telegram"></i>
+          </a>
+
+          <!-- WhatsApp -->
+          <a href="https://wa.me/201019999059" target="_blank" rel="noopener noreferrer" title="واتساب د. حمزة القصبي"
+            class="w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 hover:text-white flex items-center justify-center text-sm transition">
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
+
+          <!-- YouTube -->
+          <a href="https://youtube.com/@profhksby" target="_blank" rel="noopener noreferrer" title="قناة يوتيوب د. حمزة القصبي (@profhksby)"
+            class="w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white flex items-center justify-center text-sm transition">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+
+          <!-- Facebook -->
+          <a href="https://facebook.com/profhksby" target="_blank" rel="noopener noreferrer" title="صفحة فيسبوك د. حمزة القصبي (profhksby)"
+            class="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 hover:text-white flex items-center justify-center text-sm transition">
+            <i class="fa-brands fa-facebook"></i>
+          </a>
+        </div>
+
         <!-- Dark Mode Toggle Button -->
         <button id="theme-toggle-btn" onclick="toggleDarkMode()" title="التبديل بين الوضع الليلي والنهاري"
           class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center text-base transition shadow-sm">
@@ -110,10 +142,12 @@
       
       <!-- Hero Banner -->
       <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-teal-900 to-slate-900 text-white p-8 sm:p-12 shadow-2xl">
-        <div class="relative z-10 max-w-2xl space-y-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+        <div class="relative z-10 max-w-3xl space-y-4">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
             <i class="fa-solid fa-graduation-cap"></i>
-            <span>العام الجامعي الحالي - الفصل الدراسي الثاني</span>
+            <span>العام الجامعي 2026-2027 - الفصل الدراسي الأول</span>
+            <span class="opacity-40">|</span>
+            <span>كلية الدراسات العليا للتربية - جامعة القاهرة</span>
           </div>
           <h2 class="text-2xl sm:text-4xl font-extrabold leading-tight">
             مرحباً بكم في منصة تنظيم المجموعات والأنشطة الأكاديمية
@@ -121,6 +155,25 @@
           <p class="text-sm sm:text-base text-emerald-100/90 leading-relaxed">
             المنصة تتيح للطلاب المسجلين تشكيل المجموعات الدراسية (بحد أقصى 10 طلاب)، والاطلاع على الأنشطة والتكليفات وحجز موضوعات العرض بمتابعة مباشرة من أستاذ المقرر د. حمزة محمد القصبي.
           </p>
+
+          <!-- Social Links in Hero Banner -->
+          <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
+            <span class="text-emerald-200 font-bold">قنوات التواصل الأكاديمي (profhksby):</span>
+            <div class="flex items-center gap-2">
+              <a href="https://t.me/profhksby" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-telegram text-sky-400"></i> Telegram
+              </a>
+              <a href="https://wa.me/201019999059" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp
+              </a>
+              <a href="https://youtube.com/@profhksby" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-youtube text-rose-400"></i> YouTube
+              </a>
+              <a href="https://facebook.com/profhksby" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-facebook text-blue-400"></i> Facebook
+              </a>
+            </div>
+          </div>
         </div>
         <div class="absolute -left-10 -bottom-10 opacity-10 pointer-events-none text-9xl">
           <i class="fa-solid fa-users-rectangle"></i>
@@ -136,7 +189,7 @@
           </div>
 
           <h3 class="text-xl font-black text-slate-900 dark:text-white">تسجيل دخول الطلاب</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">يرجى اختيار المقرر وكتابة رقم الطالب ورقم الواتساب للمتابعة</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">يرجى اختيار المقرر وكتابة البيانات المطلوبة للمتابعة</p>
 
           <form id="student-login-form" onsubmit="handleStudentLogin(event)" class="space-y-4 text-right">
             
@@ -164,7 +217,7 @@
             <!-- Student ID -->
             <div>
               <label for="login-student-id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                رقم الطالب / رقم الخريج:
+                رقم الطالب:
               </label>
               <div class="relative">
                 <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
@@ -176,7 +229,7 @@
               <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">الرقم المكون من 12 رقماً الموجود في كارنيه الكلية أو كشف التسجيل.</p>
             </div>
 
-            <!-- WhatsApp Number (Strictly Private) -->
+            <!-- WhatsApp Number (Strictly Private for Professor Only) -->
             <div>
               <label for="login-phone" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
                 <span>رقم المحمول (الواتساب للتواصل الأكاديمي):</span>
@@ -190,6 +243,22 @@
                   class="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono transition">
               </div>
               <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">يُستخدم للتواصل الأكاديمي مع أستاذ المقرر ولا يظهر لأي طالب آخر.</p>
+            </div>
+
+            <!-- Job / Profession (Strictly Private for Professor Only) -->
+            <div>
+              <label for="login-job" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                <span>الوظيفة / جهة العمل:</span>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal"><i class="fa-solid fa-lock text-[9px]"></i> خاص بأستاذ المقرر فقط</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+                  <i class="fa-solid fa-briefcase text-emerald-500"></i>
+                </span>
+                <input type="text" id="login-job" required placeholder="مثال: معلم لغة عربية، إداري، أخصائي..."
+                  class="w-full pr-10 pl-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans transition">
+              </div>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">خاص بأستاذ المقرر فقط في لوحة التحكم لمتابعة التكليفات الأكاديمية.</p>
             </div>
 
             <!-- Submit Button -->
@@ -385,7 +454,7 @@
           </div>
           <div>
             <h2 class="text-xl font-black text-slate-900 dark:text-white">لوحة تحكم أستاذ المقرر - د. حمزة محمد القصبي</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">متابعة واعتماد المجموعات، إدارة الأنشطة والموضوعات، وأرقام هواتف الطلاب</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">متابعة واعتماد المجموعات، إدارة الأنشطة والموضوعات، أرقام الهواتف والوظائف</p>
           </div>
         </div>
 
@@ -493,7 +562,7 @@
         <h3 class="font-black text-base text-slate-900 dark:text-white mb-6 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-users text-emerald-600 dark:text-emerald-400"></i>
-            <span>قائمة المجموعات وتفاصيل الأعضاء والهواتف:</span>
+            <span>قائمة المجموعات وتفاصيل الأعضاء والهواتف والوظائف:</span>
           </div>
           <span id="admin-groups-count-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"></span>
         </h3>
@@ -579,7 +648,17 @@
   <!-- ================= FOOTER ================= -->
   <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p>© 2026 جميع الحقوق محفوظة - منصة المجموعات والتكليفات الأكاديمية</p>
+      <p>© 2026-2027 كلية الدراسات العليا للتربية - جامعة القاهرة | جميع الحقوق محفوظة</p>
+      
+      <!-- Footer profhksby Socials -->
+      <div class="flex items-center gap-3">
+        <span>تواصل مع أستاذ المقرر (profhksby):</span>
+        <a href="https://t.me/profhksby" target="_blank" rel="noopener noreferrer" class="hover:text-sky-500 transition"><i class="fa-brands fa-telegram"></i></a>
+        <a href="https://wa.me/201019999059" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-500 transition"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://youtube.com/@profhksby" target="_blank" rel="noopener noreferrer" class="hover:text-rose-500 transition"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://facebook.com/profhksby" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 transition"><i class="fa-brands fa-facebook"></i></a>
+      </div>
+
       <p>إشراف وتصميم المسار الأكاديمي: <strong class="text-slate-700 dark:text-slate-200">د. حمزة محمد القصبي</strong></p>
     </div>
   </footer>
@@ -681,10 +760,12 @@
       e.preventDefault();
       const studentId = document.getElementById('login-student-id').value.trim();
       const phone = document.getElementById('login-phone').value.trim();
+      const job = document.getElementById('login-job').value.trim();
       const courseId = document.querySelector('input[name="loginCourse"]:checked').value;
 
       if (!studentId) return showToast('يرجى إدخال رقم الطالب', 'warning');
       if (!phone) return showToast('يرجى إدخال رقم الواتساب', 'warning');
+      if (!job) return showToast('يرجى إدخال الوظيفة / جهة العمل', 'warning');
 
       const btn = document.getElementById('login-submit-btn');
       btn.disabled = true;
@@ -694,7 +775,7 @@
         const res = await fetch('/api/student/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId, phone, courseId })
+          body: JSON.stringify({ studentId, phone, job, courseId })
         });
         const data = await res.json();
 
@@ -1303,7 +1384,7 @@
 
     function renderAdminDashboard() {
       const cId = state.adminCourseId;
-      const { settings, groups, studentPhones, activities } = state.adminData;
+      const { settings, groups, studentPhones, studentJobs, activities } = state.adminData;
 
       // Update Tabs Style
       const tabEl = document.getElementById('admin-tab-elearning');
@@ -1351,6 +1432,9 @@
         return;
       }
 
+      const jobsMap = studentJobs || {};
+      const phonesMap = studentPhones || {};
+
       container.innerHTML = courseGroups.map(g => `
         <div class="rounded-3xl border border-slate-200 dark:border-slate-800 p-6 bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -1363,7 +1447,7 @@
                 }
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                القائد: <strong>${g.leaderName}</strong> (هاتف: <span class="font-mono text-emerald-600 font-bold">${studentPhones[g.leaderId] || 'غير مسجل'}</span>) | عدد الأعضاء: <strong>${g.members.length}</strong>
+                القائد: <strong>${g.leaderName}</strong> (هاتف: <span class="font-mono text-emerald-600 font-bold">${phonesMap[g.leaderId] || 'غير مسجل'}</span>) | عدد الأعضاء: <strong>${g.members.length}</strong>
               </p>
             </div>
 
@@ -1379,19 +1463,30 @@
             </div>
           </div>
 
-          <!-- Group Members & Private WhatsApp Numbers -->
+          <!-- Group Members & Private WhatsApp Numbers & Jobs -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
             ${g.members.map(m => `
-              <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                  <span class="font-bold text-slate-800 dark:text-slate-200">${m.name}</span>
-                  <span class="text-[10px] text-slate-400 block font-mono">رقم الطالب: ${m.studentId} | الشعبة: ${m.section || 'عامة'}</span>
-                </div>
-                <div class="text-left font-mono">
-                  <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold block">
-                    <i class="fa-brands fa-whatsapp text-[10px]"></i> ${studentPhones[m.studentId] || 'غير مسجل'}
+              <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col justify-between gap-1.5 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">${m.name}</span>
+                    <span class="text-[10px] text-slate-400 block font-mono">رقم الطالب: ${m.studentId} | الشعبة: ${m.section || 'عامة'}</span>
+                  </div>
+                  <span class="text-[10px] px-2 py-0.5 rounded font-bold ${m.role === 'leader' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
+                    ${m.role === 'leader' ? '👑 قائد' : 'عضو'}
                   </span>
-                  <span class="text-[9px] text-slate-400">${m.role === 'leader' ? 'قائد' : 'عضو'} (${m.status === 'confirmed' ? 'مؤكد' : 'معلق'})</span>
+                </div>
+                
+                <!-- Private Job & WhatsApp Details for Admin Only -->
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between text-[11px] gap-2">
+                  <div class="flex items-center gap-1 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-briefcase text-emerald-600 text-[10px]"></i>
+                    <span>الوظيفة: <strong>${jobsMap[m.studentId] || 'غير مسجلة'}</strong></span>
+                  </div>
+                  <div class="font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                    <i class="fa-brands fa-whatsapp text-xs"></i>
+                    <span>${phonesMap[m.studentId] || 'غير مسجل'}</span>
+                  </div>
                 </div>
               </div>
             `).join('')}
