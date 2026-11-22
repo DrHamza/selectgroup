@@ -1,6 +1,7 @@
 {
   "settings": {
-    "adminPassword": "admin",
+    "adminUsername": "drhamza",
+    "adminPassword": "admin2027",
     "courses": {
       "elearning": {
         "id": "elearning",
