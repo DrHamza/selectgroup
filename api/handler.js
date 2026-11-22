@@ -34,6 +34,28 @@ function canTeamUp(leader, candidate, courseId) {
   }
 }
 
+// Sequential group numbering strictly based on priority of formation timestamp
+function reindexGroupsByCreationPriority(groups) {
+  if (!Array.isArray(groups)) return;
+  const byCourse = {};
+  groups.forEach(g => {
+    if (!g.courseId) return;
+    if (!byCourse[g.courseId]) byCourse[g.courseId] = [];
+    byCourse[g.courseId].push(g);
+  });
+
+  Object.values(byCourse).forEach(courseGroups => {
+    courseGroups.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeA - timeB;
+    });
+    courseGroups.forEach((g, idx) => {
+      g.groupNumber = idx + 1;
+    });
+  });
+}
+
 // Global cached state (for serverless reuse)
 let memoryAppData = JSON.parse(JSON.stringify(initialAppData));
 
@@ -41,14 +63,15 @@ const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
 async function getAppData() {
+  let data = null;
   if (KV_URL && KV_TOKEN) {
     try {
       const res = await fetch(`${KV_URL}/get/app_data`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
-      const data = await res.json();
-      if (data && data.result) {
-        return typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+      const kvData = await res.json();
+      if (kvData && kvData.result) {
+        data = typeof kvData.result === 'string' ? JSON.parse(kvData.result) : kvData.result;
       }
     } catch (e) {
       console.error('KV get error:', e);
@@ -56,21 +79,31 @@ async function getAppData() {
   }
 
   // Local file / /tmp fallback
-  try {
-    const tmpPath = '/tmp/app_data.json';
-    if (fs.existsSync(tmpPath)) {
-      return JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
-    }
-    const localPath = path.join(__dirname, '../data/app_data.json');
-    if (fs.existsSync(localPath)) {
-      return JSON.parse(fs.readFileSync(localPath, 'utf8'));
-    }
-  } catch (e) {}
+  if (!data) {
+    try {
+      const tmpPath = '/tmp/app_data.json';
+      if (fs.existsSync(tmpPath)) {
+        data = JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
+      } else {
+        const localPath = path.join(__dirname, '../data/app_data.json');
+        if (fs.existsSync(localPath)) {
+          data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+        }
+      }
+    } catch (e) {}
+  }
 
-  return memoryAppData;
+  if (!data) data = memoryAppData;
+  if (data && data.groups) {
+    reindexGroupsByCreationPriority(data.groups);
+  }
+  return data;
 }
 
 async function saveAppData(data) {
+  if (data && data.groups) {
+    reindexGroupsByCreationPriority(data.groups);
+  }
   memoryAppData = data;
 
   if (KV_URL && KV_TOKEN) {
@@ -314,6 +347,8 @@ async function handleApi(req, res) {
         groupSummary = {
           id: myGroup.id,
           groupNumber: myGroup.groupNumber,
+          groupName: myGroup.groupName || '',
+          createdAt: myGroup.createdAt || null,
           courseId: myGroup.courseId,
           leaderId: myGroup.leaderId,
           leaderName: myGroup.leaderName,
@@ -460,6 +495,7 @@ async function handleApi(req, res) {
       const newGroup = {
         id: `grp_${courseId}_${Date.now()}`,
         groupNumber,
+        groupName: '',
         courseId,
         leaderId: leader.studentId,
         leaderName: leader.name,
@@ -485,9 +521,42 @@ async function handleApi(req, res) {
 
       if (!appData.groups) appData.groups = [];
       appData.groups.push(newGroup);
+      reindexGroupsByCreationPriority(appData.groups);
       await saveAppData(appData);
 
       return sendJson(res, 201, { success: true, group: newGroup });
+    }
+
+    // 7. Update Group Name (Available only after teacher approval)
+    if (pathname === '/api/groups/update-name' && method === 'POST') {
+      const { studentId, courseId, groupId, groupName } = await parseBody(req);
+      if (!studentId || !groupId) return sendJson(res, 400, { error: 'بيانات غير مكتملة' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      // Student must belong to group
+      const isMember = group.members.some(m => m.studentId === String(studentId).trim());
+      if (!isMember) {
+        return sendJson(res, 403, { error: 'غير مصرح لك بتسمية هذه المجموعة' });
+      }
+
+      // Must be approved by teacher
+      if (!group.isApprovedByTeacher) {
+        return sendJson(res, 403, { error: 'لا يمكن تسمية المجموعة إلا بعد اعتمادها رسمياً من أستاذ المقرر' });
+      }
+
+      const trimmedName = String(groupName || '').trim();
+      if (!trimmedName) {
+        return sendJson(res, 400, { error: 'يرجى إدخال اسم مناسب للمجموعة' });
+      }
+      if (trimmedName.length > 50) {
+        return sendJson(res, 400, { error: 'اسم المجموعة يجب ألا يتجاوز 50 حرفاً' });
+      }
+
+      group.groupName = trimmedName;
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, groupName: group.groupName, message: 'تم حفظ اسم المجموعة بنجاح' });
     }
 
     // 6. Respond to Invitation (Accept / Decline)
@@ -980,6 +1049,7 @@ async function handleApi(req, res) {
       const newGroup = {
         id: `grp_${courseId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         groupNumber: nextNum,
+        groupName: '',
         courseId,
         leaderId: leader ? leader.studentId : (membersList[0]?.studentId || null),
         leaderName: leader ? leader.name : (membersList[0]?.name || 'قيد التحديد'),
@@ -995,12 +1065,31 @@ async function handleApi(req, res) {
       };
 
       appData.groups.push(newGroup);
+      reindexGroupsByCreationPriority(appData.groups);
       await saveAppData(appData);
 
       return sendJson(res, 200, { success: true, group: newGroup, message: 'تم إنشاء المجموعة وتثبيتها بنجاح' });
     }
 
-    // 16. Admin Import Excel Data
+    // 21. Admin Update Group Name
+    if (pathname === '/api/admin/update-group-name' && method === 'POST') {
+      const { token, groupId, groupName } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      const trimmedName = String(groupName || '').trim();
+      if (trimmedName.length > 50) {
+        return sendJson(res, 400, { error: 'اسم المجموعة يجب ألا يتجاوز 50 حرفاً' });
+      }
+
+      group.groupName = trimmedName;
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, groupName: group.groupName, message: 'تم تحديث اسم المجموعة بنجاح' });
+    }
+
+    // 22. Admin Import Excel Data
     if (pathname === '/api/admin/import-excel-data' && method === 'POST') {
       const { token, courseId, topics, slots } = await parseBody(req);
       if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
@@ -1041,7 +1130,7 @@ async function handleApi(req, res) {
       const courseId = parsedUrl.query.courseId || 'elearning';
 
       let csv = '\uFEFF';
-      csv += 'رقم المجموعة,حالة الاعتماد,الموضوع المسند,موعد العرض في المحاضرة,اسم القائد,رقم الطالب,اسم الطالب,الوظيفة (لأستاذ المقرر فقط),الصفة,الحالة,رقم الواتساب (لأستاذ المقرر فقط),الشعبة,المسار / الدبلوم,توجيهات أستاذ المقرر\n';
+      csv += 'رقم المجموعة,اسم المجموعة,أولوية التكوين,حالة الاعتماد,الموضوع المسند,موعد العرض في المحاضرة,اسم القائد,رقم الطالب,اسم الطالب,الوظيفة (لأستاذ المقرر فقط),الصفة,الحالة,رقم الواتساب (لأستاذ المقرر فقط),الشعبة,المسار / الدبلوم,توجيهات أستاذ المقرر\n';
 
       const cGroups = (appData.groups || []).filter(g => g.courseId === courseId);
       for (const g of cGroups) {
@@ -1056,8 +1145,9 @@ async function handleApi(req, res) {
           const role = m.role === 'leader' ? 'قائد المجموعة' : 'عضو';
           const status = m.status === 'confirmed' ? 'مؤكد' : 'في انتظار الموافقة';
           const approval = g.isApprovedByTeacher ? 'معتمدة نهائياً' : 'قيد المراجعة';
+          const gName = `"${(g.groupName || 'بدون اسم').replace(/"/g, '""')}"`;
 
-          csv += `${g.groupNumber},"${approval}",${topic},${slot},"${g.leaderName}",${m.studentId},"${m.name}","${job}",${role},${status},"${phone}","${m.section}",${track},${notes}\n`;
+          csv += `${g.groupNumber},${gName},أسبقية #${g.groupNumber},"${approval}",${topic},${slot},"${g.leaderName}",${m.studentId},"${m.name}","${job}",${role},${status},"${phone}","${m.section}",${track},${notes}\n`;
         }
       }
 
