@@ -26,10 +26,10 @@ function canTeamUp(leader, candidate, courseId) {
   const isCandidateElec = isElectronicSection(candidate);
   
   if (isLeaderElec) {
-    // Must be in the exact same electronic section (110 with 110, 97 with 97)
-    return isCandidateElec && String(leader.section).trim() === String(candidate.section).trim();
+    // Both electronic sections (110 and 97) can partner with each other freely
+    return isCandidateElec;
   } else {
-    // Regular in-person students can mix freely, but cannot choose electronic section students
+    // Regular in-person students can mix freely, but cannot choose electronic section students (110 or 97)
     return !isCandidateElec;
   }
 }
@@ -308,9 +308,9 @@ async function handleApi(req, res) {
       let sectionNotice = '';
       if (courseId === 'elearning') {
         if (isElec) {
-          sectionNotice = `تنبيه: أنت مقيد حصرياً باختيار زملاء من شعبة التعليم الإلكتروني (${student.section || 'الافتراضية'}) فقط.`;
+          sectionNotice = 'تنبيه: أنت مقيد حصرياً باختيار زملاء من شعبتي التعليم الإلكتروني (شعبة 110 أو شعبة 97).';
         } else {
-          sectionNotice = `تنبيه: يمكنك تشكيل المجموعة من أي شعبة حضورية، مع منع اختيار طلاب شعبة التعليم الإلكتروني.`;
+          sectionNotice = 'تنبيه: يمكنك تشكيل المجموعة من أي شعبة حضورية، مع منع اختيار طلاب شعبتي التعليم الإلكتروني (110 و 97).';
         }
       } else {
         sectionNotice = 'يمكنك اختيار زملائك وتشكيل مجموعتك بحرية من أي شعبة.';
