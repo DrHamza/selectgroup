@@ -57,12 +57,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
       
       <!-- Logo, Title & Faculty -->
-      <div class="flex items-center gap-3 sm:gap-4 cursor-pointer" onclick="navigate('home')">
-        <div class="relative flex items-center justify-center">
-          <img id="header-logo-light" src="logo_dark.png" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain dark:hidden transition-transform hover:scale-105">
-          <img id="header-logo-dark" src="logo_white.png" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain hidden dark:block transition-transform hover:scale-105">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Interactive Animated Logo (Clickable to Enlarge & View Profile) -->
+        <div class="relative flex items-center justify-center cursor-pointer group" onclick="openProfessorProfileModal()" title="انقر لتكبير الشعار وعرض ملف الأستاذ وقنوات التواصل">
+          <img id="header-logo-light" src="logo_hamza_lightmode_animated.gif" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain dark:hidden transition-transform duration-300 group-hover:scale-105 rounded-xl shadow-sm">
+          <img id="header-logo-dark" src="logo_hamza_darkmode_animated.gif" alt="د. حمزة محمد القصبي" class="h-12 sm:h-14 w-auto object-contain hidden dark:block transition-transform duration-300 group-hover:scale-105 rounded-xl shadow-sm">
         </div>
-        <div>
+        <div class="cursor-pointer" onclick="navigate('home')">
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">منصة المجموعات والتكليفات الأكاديمية</h1>
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
@@ -70,7 +71,7 @@
             </span>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-            إشراف: <span class="font-bold text-emerald-600 dark:text-emerald-400">د. حمزة محمد القصبي</span>
+            إشراف: <button type="button" onclick="openProfessorProfileModal()" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">د. حمزة محمد القصبي <i class="fa-solid fa-circle-info text-[10px]"></i></button>
           </p>
         </div>
       </div>
@@ -922,6 +923,134 @@
     </div>
   </div>
 
+  <!-- ================= PROFESSOR PROFILE & ENLARGED LOGO MODAL ================= -->
+  <div id="professor-profile-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden animate-in fade-in duration-200" onclick="if(event.target === this) closeProfessorProfileModal()">
+    <div class="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-center overflow-hidden">
+      
+      <!-- Top Ambient Light Glow -->
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-amber-500/10 dark:bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Close Button -->
+      <button type="button" onclick="closeProfessorProfileModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition shadow-sm z-10" title="إغلاق النافذة">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <!-- Enlarged Animated Logo Showcase Card -->
+      <div class="relative mx-auto mb-5 p-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-amber-500/30 shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex items-center justify-center group overflow-hidden">
+        <div class="absolute inset-0 bg-radial from-amber-500/10 via-transparent to-transparent pointer-events-none"></div>
+        <img src="logo_hamza_gold_animated.gif" alt="الأستاذ الدكتور حمزة القصبي" class="h-28 sm:h-36 w-auto max-w-full object-contain filter drop-shadow-[0_8px_20px_rgba(212,175,55,0.35)] transition-transform duration-300 group-hover:scale-105">
+      </div>
+
+      <!-- Professor Information -->
+      <div class="mb-6">
+        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          الأستاذ الدكتور / حمزة محمد القصبي
+        </h3>
+        <p class="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+          أستاذ تكنولوجيا التعليم والتعليم الإلكتروني
+        </p>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          كلية الدراسات العليا للتربية - جامعة القاهرة
+        </p>
+      </div>
+
+      <!-- Clickable Channels Grid -->
+      <div class="border-t border-slate-100 dark:border-slate-800 pt-5">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <span class="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-link text-emerald-500"></i>
+            <span>قنوات التواصل والمنصات العلمية المعتمدة (profhksby)</span>
+          </span>
+          <span class="text-[10px] text-slate-400">انقر للزيارة المباشرة</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 text-right">
+          
+          <!-- Google Scholar -->
+          <a href="https://scholar.google.com.eg/citations?hl=ar&user=UaVUXcEAAAAJ&view_op=list_works&authuser=1&gmla=ACrTK9X1pvrR510r8mfa7qKnypx70ZO7kzGk8MFVxeFI_tlhr1n5_JjYiWKzh_XGOFgb0E3fEh6M_e3yn67e1xAZsO-ygdfiuIgL3OvnKsyVSUB_ar7GmNS_" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50/70 hover:bg-blue-100/80 dark:bg-blue-950/30 dark:hover:bg-blue-900/40 border border-blue-200/60 dark:border-blue-900/50 hover:border-blue-400 text-blue-700 dark:text-blue-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-google-scholar"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">Google Scholar</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">الباحث العلمي</p>
+            </div>
+          </a>
+
+          <!-- ORCID -->
+          <a href="https://orcid.org/0000-0002-2667-5378" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100/80 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 border border-emerald-200/60 dark:border-emerald-900/50 hover:border-[#a6ce39] text-emerald-800 dark:text-emerald-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-[#a6ce39] text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-orcid"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">ORCID</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">المعرف الدولي</p>
+            </div>
+          </a>
+
+          <!-- LinkedIn -->
+          <a href="https://www.linkedin.com/in/profhksby/" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-sky-50/70 hover:bg-sky-100/80 dark:bg-sky-950/30 dark:hover:bg-sky-900/40 border border-sky-200/60 dark:border-sky-900/50 hover:border-sky-400 text-sky-800 dark:text-sky-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-[#0077b5] text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-linkedin-in"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">LinkedIn</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">الملف المهني</p>
+            </div>
+          </a>
+
+          <!-- Telegram -->
+          <a href="https://t.me/profhksby" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-cyan-50/70 hover:bg-cyan-100/80 dark:bg-cyan-950/30 dark:hover:bg-cyan-900/40 border border-cyan-200/60 dark:border-cyan-900/50 hover:border-cyan-400 text-cyan-800 dark:text-cyan-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-[#229ED9] text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-telegram"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">Telegram</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">@profhksby</p>
+            </div>
+          </a>
+
+          <!-- YouTube -->
+          <a href="https://youtube.com/@profhksby" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-red-50/70 hover:bg-red-100/80 dark:bg-red-950/30 dark:hover:bg-red-900/40 border border-red-200/60 dark:border-red-900/50 hover:border-red-400 text-red-800 dark:text-red-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-[#FF0000] text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-youtube"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">YouTube</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">القناة الرسمية</p>
+            </div>
+          </a>
+
+          <!-- Facebook -->
+          <a href="https://facebook.com/profhksby" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100/80 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/40 border border-indigo-200/60 dark:border-indigo-900/50 hover:border-indigo-400 text-indigo-800 dark:text-indigo-300 transition-all hover:scale-[1.02] shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-[#1877F2] text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-brands fa-facebook-f"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-black leading-tight truncate">Facebook</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">الصفحة الرسمية</p>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Bottom Close Button -->
+      <div class="mt-6">
+        <button type="button" onclick="closeProfessorProfileModal()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition">
+          إغلاق النافذة
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ================= FOOTER ================= -->
   <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -1715,7 +1844,31 @@
       }
     }
 
-    // --- Admin Authentication & Controls ---
+    // --- Professor Profile & Enlarged Logo Lightbox Modal ---
+    function openProfessorProfileModal() {
+      const modal = document.getElementById('professor-profile-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeProfessorProfileModal() {
+      const modal = document.getElementById('professor-profile-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeProfessorProfileModal();
+      }
+    });
+
+        // --- Admin Authentication & Controls ---
     function openAdminModal() {
       document.getElementById('admin-modal').classList.remove('hidden');
       document.getElementById('admin-username-input').value = 'drhamza';
