@@ -325,12 +325,11 @@ async function handleApi(req, res) {
           isApprovedByTeacher: !!myGroup.isApprovedByTeacher,
           isLocked: !!myGroup.isLocked,
           myStatus: myMember?.status || 'confirmed',
+          isLeader: myGroup.leaderId === studentId,
           members: myGroup.members.map(m => ({
-            studentId: m.studentId,
             name: m.name,
             role: m.role,
-            status: m.status,
-            section: m.section
+            status: m.status
           }))
         };
       }
@@ -339,9 +338,9 @@ async function handleApi(req, res) {
       let sectionNotice = '';
       if (courseId === 'elearning') {
         if (isElec) {
-          sectionNotice = 'تنبيه: أنت مقيد حصرياً باختيار زملاء من شعبتي التعليم الإلكتروني (شعبة 110 أو شعبة 97).';
+          sectionNotice = 'تنبيه: أنت مقيد حصرياً باختيار زملاء من مسار/شعبة التعليم الإلكتروني فقط.';
         } else {
-          sectionNotice = 'تنبيه: يمكنك تشكيل المجموعة من أي شعبة حضورية، مع منع اختيار طلاب شعبتي التعليم الإلكتروني (110 و 97).';
+          sectionNotice = 'تنبيه: يمكنك تشكيل المجموعة مع الزملاء من الشعب المتوافقة، مع عدم إمكانية اختيار طلاب شعبة التعليم الإلكتروني.';
         }
       } else {
         sectionNotice = 'يمكنك اختيار زملائك وتشكيل مجموعتك بحرية من أي شعبة.';
@@ -403,7 +402,6 @@ async function handleApi(req, res) {
         matched.push({
           studentId: cand.studentId,
           name: cand.name,
-          section: cand.section || 'عامة',
           track: cand.track || ''
         });
 
@@ -660,7 +658,14 @@ async function handleApi(req, res) {
         presentationSlots: appData.presentationSlots || [],
         groups: appData.groups || [],
         studentPhones: appData.studentPhones || {},
-        studentJobs: appData.studentJobs || {}
+        studentJobs: appData.studentJobs || {},
+        courseStudents: studentsList.map(s => ({
+          studentId: s.studentId,
+          name: s.name,
+          courseName: s.courseName,
+          section: s.section || 'عامة',
+          track: s.track || ''
+        }))
       });
     }
 
@@ -753,6 +758,246 @@ async function handleApi(req, res) {
       appData.groups.splice(idx, 1);
       await saveAppData(appData);
       return sendJson(res, 200, { success: true, message: 'تم حذف المجموعة' });
+    }
+
+    // 16. Admin Move Student Between Groups
+    if (pathname === '/api/admin/move-student' && method === 'POST') {
+      const { token, studentId, fromGroupId, toGroupId } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      if (!studentId || !fromGroupId) {
+        return sendJson(res, 400, { error: 'بيانات النقل غير مكتملة' });
+      }
+
+      const fromGroup = (appData.groups || []).find(g => g.id === fromGroupId);
+      if (!fromGroup) return sendJson(res, 404, { error: 'المجموعة المصدر غير موجودة' });
+
+      const memberIdx = fromGroup.members.findIndex(m => m.studentId === studentId);
+      if (memberIdx === -1) return sendJson(res, 404, { error: 'الطالب غير موجود في المجموعة المصدر' });
+
+      const [movingMember] = fromGroup.members.splice(memberIdx, 1);
+
+      // If leader left fromGroup, reassign leader
+      if (fromGroup.members.length > 0) {
+        if (fromGroup.leaderId === studentId) {
+          fromGroup.members[0].role = 'leader';
+          fromGroup.leaderId = fromGroup.members[0].studentId;
+          fromGroup.leaderName = fromGroup.members[0].name;
+        }
+      } else {
+        // If fromGroup became empty, clean it up
+        appData.groups = appData.groups.filter(g => g.id !== fromGroupId);
+      }
+
+      if (toGroupId && toGroupId !== 'new') {
+        const toGroup = (appData.groups || []).find(g => g.id === toGroupId);
+        if (!toGroup) return sendJson(res, 404, { error: 'المجموعة الهدف غير موجودة' });
+
+        movingMember.role = toGroup.members.length === 0 ? 'leader' : 'member';
+        movingMember.status = 'confirmed';
+        toGroup.members.push(movingMember);
+        if (toGroup.members.length === 1) {
+          toGroup.leaderId = movingMember.studentId;
+          toGroup.leaderName = movingMember.name;
+        }
+      } else if (toGroupId === 'new') {
+        const courseId = fromGroup.courseId;
+        const currentCourseGroups = (appData.groups || []).filter(g => g.courseId === courseId);
+        const maxNum = currentCourseGroups.reduce((max, g) => Math.max(max, g.groupNumber || 0), 0);
+        const newGroup = {
+          id: `grp_${courseId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          groupNumber: maxNum + 1,
+          courseId,
+          leaderId: movingMember.studentId,
+          leaderName: movingMember.name,
+          topicId: null,
+          topicTitle: null,
+          presentationSlotId: null,
+          presentationSlotTitle: null,
+          teacherNotes: '',
+          isApprovedByTeacher: true,
+          isLocked: false,
+          createdAt: new Date().toISOString(),
+          members: [{
+            ...movingMember,
+            role: 'leader',
+            status: 'confirmed'
+          }]
+        };
+        appData.groups.push(newGroup);
+      }
+
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, message: 'تم نقل الطالب بنجاح' });
+    }
+
+    // 17. Admin Remove Student from Group (Back to Unassigned)
+    if (pathname === '/api/admin/remove-student-from-group' && method === 'POST') {
+      const { token, studentId, groupId } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      const memberIdx = group.members.findIndex(m => m.studentId === studentId);
+      if (memberIdx === -1) return sendJson(res, 404, { error: 'الطالب غير موجود في هذه المجموعة' });
+
+      group.members.splice(memberIdx, 1);
+
+      if (group.members.length > 0) {
+        if (group.leaderId === studentId) {
+          group.members[0].role = 'leader';
+          group.leaderId = group.members[0].studentId;
+          group.leaderName = group.members[0].name;
+        }
+      } else {
+        appData.groups = appData.groups.filter(g => g.id !== groupId);
+      }
+
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, message: 'تم إخراج الطالب من المجموعة بنجاح' });
+    }
+
+    // 18. Admin Add Student to Group Directly
+    if (pathname === '/api/admin/add-student-to-group' && method === 'POST') {
+      const { token, studentId, groupId } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      const student = studentsById.get(String(studentId).trim());
+      if (!student) return sendJson(res, 404, { error: 'الطالب غير مسجل في الكلية' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      if (group.members.some(m => m.studentId === student.studentId)) {
+        return sendJson(res, 400, { error: 'الطالب مسجل بالفعل داخل هذه المجموعة' });
+      }
+
+      // If student is in another group in this course, remove them first
+      (appData.groups || []).forEach(otherGroup => {
+        if (otherGroup.courseId === group.courseId && otherGroup.id !== group.id) {
+          const idx = otherGroup.members.findIndex(m => m.studentId === student.studentId);
+          if (idx !== -1) {
+            otherGroup.members.splice(idx, 1);
+            if (otherGroup.leaderId === student.studentId && otherGroup.members.length > 0) {
+              otherGroup.members[0].role = 'leader';
+              otherGroup.leaderId = otherGroup.members[0].studentId;
+              otherGroup.leaderName = otherGroup.members[0].name;
+            }
+          }
+        }
+      });
+      appData.groups = (appData.groups || []).filter(g => g.members.length > 0);
+
+      const isLeader = group.members.length === 0;
+      group.members.push({
+        studentId: student.studentId,
+        name: student.name,
+        role: isLeader ? 'leader' : 'member',
+        status: 'confirmed',
+        section: student.section || 'عامة'
+      });
+
+      if (isLeader) {
+        group.leaderId = student.studentId;
+        group.leaderName = student.name;
+      }
+
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, message: `تمت إضافة الطالب ${student.name} إلى المجموعة`, group });
+    }
+
+    // 19. Admin Set Group Leader
+    if (pathname === '/api/admin/set-leader' && method === 'POST') {
+      const { token, studentId, groupId } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      const targetMember = group.members.find(m => m.studentId === studentId);
+      if (!targetMember) return sendJson(res, 404, { error: 'الطالب غير موجود في هذه المجموعة' });
+
+      group.members.forEach(m => {
+        m.role = m.studentId === studentId ? 'leader' : 'member';
+      });
+      group.leaderId = targetMember.studentId;
+      group.leaderName = targetMember.name;
+
+      await saveAppData(appData);
+      return sendJson(res, 200, { success: true, message: `تم تعيين ${targetMember.name} قائداً للمجموعة بنجاح`, group });
+    }
+
+    // 20. Admin Create Group Manually
+    if (pathname === '/api/admin/create-group' && method === 'POST') {
+      const { token, courseId, groupNumber, leaderId, memberIds, isApproved } = await parseBody(req);
+      if (!token || !token.startsWith('admin_')) return sendJson(res, 403, { error: 'غير مصرح' });
+
+      if (!courseId) return sendJson(res, 400, { error: 'يرجى تحديد المقرر' });
+
+      const currentCourseGroups = (appData.groups || []).filter(g => g.courseId === courseId);
+      const nextNum = (Number(groupNumber) > 0) 
+        ? Number(groupNumber) 
+        : (currentCourseGroups.reduce((max, g) => Math.max(max, g.groupNumber || 0), 0) + 1);
+
+      let leader = leaderId ? studentsById.get(String(leaderId).trim()) : null;
+      const initialMemberIds = Array.isArray(memberIds) ? memberIds : [];
+
+      if (!leader && initialMemberIds.length > 0) {
+        leader = studentsById.get(String(initialMemberIds[0]).trim());
+      }
+
+      const allIds = Array.from(new Set([
+        ...(leader ? [leader.studentId] : []),
+        ...initialMemberIds
+      ]));
+
+      // Remove from other groups in this course
+      (appData.groups || []).forEach(otherGroup => {
+        if (otherGroup.courseId === courseId) {
+          otherGroup.members = otherGroup.members.filter(m => !allIds.includes(m.studentId));
+          if (otherGroup.members.length > 0 && allIds.includes(otherGroup.leaderId)) {
+            otherGroup.members[0].role = 'leader';
+            otherGroup.leaderId = otherGroup.members[0].studentId;
+            otherGroup.leaderName = otherGroup.members[0].name;
+          }
+        }
+      });
+      appData.groups = (appData.groups || []).filter(g => g.members.length > 0);
+
+      const membersList = allIds.map((id, idx) => {
+        const s = studentsById.get(id);
+        const isL = leader ? id === leader.studentId : idx === 0;
+        return {
+          studentId: id,
+          name: s ? s.name : id,
+          role: isL ? 'leader' : 'member',
+          status: 'confirmed',
+          section: s ? (s.section || 'عامة') : 'عامة'
+        };
+      });
+
+      const newGroup = {
+        id: `grp_${courseId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        groupNumber: nextNum,
+        courseId,
+        leaderId: leader ? leader.studentId : (membersList[0]?.studentId || null),
+        leaderName: leader ? leader.name : (membersList[0]?.name || 'قيد التحديد'),
+        topicId: null,
+        topicTitle: null,
+        presentationSlotId: null,
+        presentationSlotTitle: null,
+        teacherNotes: '',
+        isApprovedByTeacher: isApproved !== false,
+        isLocked: false,
+        createdAt: new Date().toISOString(),
+        members: membersList
+      };
+
+      appData.groups.push(newGroup);
+      await saveAppData(appData);
+
+      return sendJson(res, 200, { success: true, group: newGroup, message: 'تم إنشاء المجموعة وتثبيتها بنجاح' });
     }
 
     // 16. Admin Import Excel Data

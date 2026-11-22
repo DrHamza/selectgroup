@@ -517,14 +517,24 @@
         </div>
 
         <!-- Controls for Selected Course -->
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          <button onclick="openCreateGroupModalAdmin()" 
+            class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>إنشاء مجموعة جديدة</span>
+          </button>
+          <button onclick="openUnassignedModalAdmin()" 
+            class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-users-viewfinder"></i>
+            <span>الطلاب غير المنضمين (<span id="stat-unassigned-badge">0</span>)</span>
+          </button>
           <button id="admin-toggle-course-btn" onclick="toggleCurrentCourseRegistration()"
             class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
           </button>
           <button onclick="approveAllCurrentCourseGroups()"
-            class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-check-double"></i>
-            <span>اعتماد كافة المجموعات دفعة واحدة</span>
+            class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+            <i class="fa-solid fa-check-double text-emerald-600"></i>
+            <span>اعتماد الكل</span>
           </button>
         </div>
 
@@ -557,21 +567,28 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center transition-colors">
           <span class="text-2xl font-black text-slate-900 dark:text-white" id="stat-total-groups">0</span>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-bold">المجموعات المشكلة</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center transition-colors">
           <span class="text-2xl font-black text-emerald-600" id="stat-approved-groups">0</span>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-bold">المجموعات المعتمدة</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center transition-colors">
           <span class="text-2xl font-black text-blue-600" id="stat-assigned-students">0</span>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-bold">الطلاب المنضمون</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
-          <span class="text-2xl font-black text-purple-600" id="stat-topics-reserved">0</span>
+        <div onclick="openUnassignedModalAdmin()" class="bg-purple-50/70 dark:bg-purple-950/30 p-4 rounded-2xl border border-purple-200 dark:border-purple-800 text-center cursor-pointer hover:border-purple-400 transition shadow-sm">
+          <span class="text-2xl font-black text-purple-700 dark:text-purple-300" id="stat-unassigned-students">0</span>
+          <p class="text-[11px] text-purple-900 dark:text-purple-300 mt-1 font-bold flex items-center justify-center gap-1">
+            <span>غير منضمين</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+          </p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center transition-colors">
+          <span class="text-2xl font-black text-teal-600" id="stat-topics-reserved">0</span>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-bold">الموضوعات المحجوزة</p>
         </div>
       </div>
@@ -666,6 +683,173 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN TRANSFER STUDENT MODAL ================= -->
+  <div id="admin-transfer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950/70 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-arrows-turn-to-dots"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900 dark:text-white">نقل طالب إلى مجموعة أخرى</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="transfer-modal-student-name">الطالب: ...</p>
+        </div>
+      </div>
+
+      <input type="hidden" id="transfer-student-id">
+      <input type="hidden" id="transfer-from-group-id">
+
+      <div class="space-y-3 pt-2">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المجموعة الحالية:</label>
+          <div id="transfer-current-group-label" class="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+            ...
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اختر المجموعة المستهدفة للنقل إليها:</label>
+          <select id="transfer-target-group-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-sans focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button type="button" onclick="confirmTransferStudent()" class="flex-1 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-check"></i>
+          <span>تأكيد نقل الطالب</span>
+        </button>
+        <button type="button" onclick="closeTransferModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN ADD STUDENT TO GROUP MODAL ================= -->
+  <div id="admin-add-student-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white" id="add-student-modal-title">إضافة طالب إلى المجموعة</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">اختر طالباً من غير المنضمين أو ابحث بالاسم لإضافته فوراً للمجموعة</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAddStudentModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="add-student-target-group-id">
+
+      <div class="relative">
+        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" id="add-student-search-input" oninput="filterAddStudentCandidates()" placeholder="ابحث باسم الطالب، الشعبة، أو الرقم الأكاديمي..."
+          class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans transition">
+      </div>
+
+      <div id="add-student-candidates-list" class="overflow-y-auto flex-1 space-y-2 pr-1 min-h-[220px] max-h-[360px]">
+        <!-- Dynamic candidate cards -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN CREATE GROUP MANUALLY MODAL ================= -->
+  <div id="admin-create-group-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-teal-100 dark:bg-teal-950/70 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">إنشاء مجموعة جديدة يدوياً</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">تحديد رقم المجموعة واختيار الطلاب واعتمادها فوراً</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCreateGroupModalAdmin()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم المجموعة:</label>
+          <input type="number" id="manual-group-number" min="1" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div class="flex items-center pt-5">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+            <input type="checkbox" id="manual-group-approved" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+            <span>اعتماد المجموعة وتفعيل التكليف فوراً</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">اختر الطلاب لإضافتهم للمجموعة الجديدة (اختياري، يمكنك إضافة المزيد لاحقاً):</label>
+        <div class="relative mb-2">
+          <input type="text" id="manual-group-search-input" oninput="filterManualGroupCandidates()" placeholder="ابحث بالاسم لتحديد الطلاب..."
+            class="w-full pr-3 pl-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans">
+        </div>
+        <div id="manual-group-candidates-list" class="overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-2xl p-2 space-y-1.5 max-h-[200px]">
+          <!-- Student checkboxes -->
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <button type="button" onclick="confirmCreateGroupAdmin()" class="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-plus"></i>
+          <span>إنشاء وتثبيت المجموعة</span>
+        </button>
+        <button type="button" onclick="closeCreateGroupModalAdmin()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN UNASSIGNED STUDENTS EXPLORER MODAL ================= -->
+  <div id="admin-unassigned-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-3xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-950/70 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-users-viewfinder"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <span>الطلاب غير المنضمين لمجموعات</span>
+              <span id="unassigned-modal-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">0 طالب</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">يمكنك تسكين أي طالب مباشرة في أي مجموعة أو تشكيل مجموعة جديدة له</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeUnassignedModalAdmin()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="relative">
+        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" id="unassigned-search-input" oninput="filterUnassignedStudents()" placeholder="ابحث باسم الطالب، الشعبة، أو الرقم الأكاديمي..."
+          class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans transition">
+      </div>
+
+      <div id="unassigned-students-list" class="overflow-y-auto flex-1 space-y-2 pr-1 min-h-[260px] max-h-[420px]">
+        <!-- Unassigned student cards with quick assign dropdown -->
+      </div>
     </div>
   </div>
 
@@ -854,7 +1038,7 @@
       document.getElementById('workspace-student-name').textContent = state.student.name;
       document.getElementById('workspace-course-badge').textContent = course.name;
       document.getElementById('workspace-student-details').textContent = 
-        `رقم الطالب: ${state.student.studentId} | الشعبة: ${state.student.section || 'عامة'} | ${state.student.track || ''}`;
+        state.student.track ? `المسار الأكاديمي: ${state.student.track}` : 'كلية الدراسات العليا للتربية - جامعة القاهرة';
 
       // Course Status Badge
       const statusBadge = document.getElementById('workspace-course-status-badge');
@@ -970,7 +1154,7 @@
                   <span class="font-bold text-xs text-slate-900 dark:text-white">${m.name}</span>
                   ${m.role === 'leader' ? '<span class="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded">قائد المجموعة</span>' : ''}
                 </div>
-                <p class="text-[11px] text-slate-400 font-mono">رقم الطالب: ${m.studentId} | الشعبة: ${m.section || 'عامة'}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">${m.role === 'leader' ? 'مسؤول التنسيق والتواصل' : 'عضو مشارك في المجموعة'}</p>
               </div>
             </div>
             <div>
@@ -1143,12 +1327,12 @@
               <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between gap-3 shadow-sm">
                 <div>
                   <h5 class="font-bold text-xs text-slate-900 dark:text-white">${cand.name}</h5>
-                  <p class="text-[10px] text-slate-400 font-mono">رقم الطالب: ${cand.studentId} | الشعبة: ${cand.section} | ${cand.track || ''}</p>
+                  <p class="text-[10px] text-slate-400 font-medium">${cand.track || 'كلية الدراسات العليا للتربية'}</p>
                 </div>
                 <div>
                   ${isAlreadyAdded 
                     ? '<span class="text-[11px] font-bold text-slate-400 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg">مضاف بالفعل</span>'
-                    : `<button type="button" onclick="addPeerToPending('${cand.studentId}', '${encodeURIComponent(cand.name)}', '${cand.section}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-1">
+                    : `<button type="button" onclick="addPeerToPending('${cand.studentId}', '${encodeURIComponent(cand.name)}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-1">
                         <i class="fa-solid fa-plus text-[10px]"></i> إضافة
                        </button>`
                   }
@@ -1209,7 +1393,6 @@
         <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs flex items-center justify-between">
           <div>
             <span class="font-bold text-slate-800 dark:text-slate-200">${idx + 2}. ${m.name}</span>
-            <span class="text-[10px] text-slate-400 font-mono ml-2">(رقم الطالب: ${m.studentId})</span>
           </div>
           <button type="button" onclick="removePeerFromPending('${m.studentId}')" class="text-rose-500 hover:text-rose-700 p-1">
             <i class="fa-solid fa-trash-can"></i>
@@ -1543,22 +1726,39 @@
       const approvedCount = courseGroups.filter(g => g.isApprovedByTeacher).length;
       let totalAssignedStudents = 0;
       let reservedTopicsCount = 0;
+      const assignedIds = new Set();
       courseGroups.forEach(g => {
         totalAssignedStudents += g.members.length;
         if (g.topicTitle) reservedTopicsCount++;
+        g.members.forEach(m => assignedIds.add(m.studentId));
       });
+
+      const unassignedList = getUnassignedStudentsForCurrentCourse();
 
       // Update Stats
       document.getElementById('stat-total-groups').textContent = courseGroups.length;
       document.getElementById('stat-approved-groups').textContent = approvedCount;
       document.getElementById('stat-assigned-students').textContent = totalAssignedStudents;
+      if (document.getElementById('stat-unassigned-students')) {
+        document.getElementById('stat-unassigned-students').textContent = unassignedList.length;
+      }
+      if (document.getElementById('stat-unassigned-badge')) {
+        document.getElementById('stat-unassigned-badge').textContent = unassignedList.length;
+      }
       document.getElementById('stat-topics-reserved').textContent = reservedTopicsCount;
-      document.getElementById('admin-groups-count-badge').textContent = `${courseGroups.length} مجموعات مسجلة`;
+      document.getElementById('admin-groups-count-badge').textContent = `${courseGroups.length} مجموعات مسجلة (${totalAssignedStudents} طلاب)`;
 
       // Render Groups List
       const container = document.getElementById('admin-groups-container');
       if (courseGroups.length === 0) {
-        container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold">لا توجد مجموعات مشكلة في هذا المقرر حتى الآن.</div>';
+        container.innerHTML = `
+          <div class="p-8 text-center space-y-3">
+            <p class="text-slate-400 text-xs font-bold">لا توجد مجموعات مشكلة في هذا المقرر حتى الآن.</p>
+            <button onclick="openCreateGroupModalAdmin()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
+              <i class="fa-solid fa-plus-circle ml-1"></i> إنشاء أول مجموعة يدوياً
+            </button>
+          </div>
+        `;
         return;
       }
 
@@ -1581,10 +1781,13 @@
               </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="openAddStudentModalAdmin('${g.id}', '${g.groupNumber}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-bold text-xs transition shadow-sm flex items-center gap-1">
+                <i class="fa-solid fa-user-plus text-xs"></i> إضافة طالب
+              </button>
               ${!g.isApprovedByTeacher ? `
                 <button onclick="approveAdminGroup('${g.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-1">
-                  <i class="fa-solid fa-check text-xs"></i> اعتماد المجموعة
+                  <i class="fa-solid fa-check text-xs"></i> اعتماد
                 </button>
               ` : `
                 <button onclick="unapproveAdminGroup('${g.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1">
@@ -1597,10 +1800,10 @@
             </div>
           </div>
 
-          <!-- Group Members & Private WhatsApp Numbers & Jobs -->
+          <!-- Group Members & Private WhatsApp Numbers & Jobs & Admin Actions -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
             ${g.members.map(m => `
-              <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col justify-between gap-1.5 shadow-sm">
+              <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col justify-between gap-2 shadow-sm">
                 <div class="flex items-start justify-between gap-2">
                   <div>
                     <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">${m.name}</span>
@@ -1612,7 +1815,7 @@
                 </div>
                 
                 <!-- Private Job & WhatsApp Details for Admin Only -->
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between text-[11px] gap-2">
+                <div class="pt-1.5 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between text-[11px] gap-2">
                   <div class="flex items-center gap-1 text-slate-600 dark:text-slate-300">
                     <i class="fa-solid fa-briefcase text-emerald-600 text-[10px]"></i>
                     <span>الوظيفة: <strong>${jobsMap[m.studentId] || 'غير مسجلة'}</strong></span>
@@ -1622,6 +1825,27 @@
                     <span>${phonesMap[m.studentId] || 'غير مسجل'}</span>
                   </div>
                 </div>
+
+                <!-- Admin Member Control Bar: Move, Set Leader, Remove -->
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1.5">
+                    ${m.role !== 'leader' ? `
+                      <button type="button" onclick="setLeaderAdmin('${g.id}', '${m.studentId}')" title="تعيين كقائد للمجموعة"
+                        class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900 text-amber-700 dark:text-amber-300 text-[10px] font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-crown text-[9px]"></i> تعيين كقائد
+                      </button>
+                    ` : ''}
+                    <button type="button" onclick="openTransferModal('${g.id}', '${m.studentId}', '${m.name.replace(/'/g, "\\'")}', '${g.groupNumber}')" title="نقل إلى مجموعة أخرى"
+                      class="px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/50 dark:hover:bg-sky-900 text-sky-700 dark:text-sky-300 text-[10px] font-bold transition flex items-center gap-1">
+                      <i class="fa-solid fa-arrows-turn-to-dots text-[9px]"></i> نقل لمجموعة
+                    </button>
+                  </div>
+                  <button type="button" onclick="removeStudentAdmin('${g.id}', '${m.studentId}', '${m.name.replace(/'/g, "\\'")}')" title="إخراج من المجموعة"
+                    class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-400 text-[10px] font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-user-xmark text-[9px]"></i> إخراج
+                  </button>
+                </div>
+
               </div>
             `).join('')}
           </div>
@@ -1763,6 +1987,354 @@
 
     function exportAdminCsv() {
       window.location.href = `/api/admin/export-csv?courseId=${state.adminCourseId}`;
+    }
+
+    // --- Admin Group & Student Management ---
+
+    function getUnassignedStudentsForCurrentCourse() {
+      if (!state.adminData) return [];
+      const cId = state.adminCourseId;
+      const expectedCourseName = (cId === 'elearning') ? 'التعليم الإلكترونى' : 'التفكير النقدي';
+      const allCourseStudents = (state.adminData.courseStudents || []).filter(s => s.courseName === expectedCourseName);
+      const courseGroups = (state.adminData.groups || []).filter(g => g.courseId === cId);
+      
+      const assignedIds = new Set();
+      courseGroups.forEach(g => {
+        g.members.forEach(m => assignedIds.add(m.studentId));
+      });
+
+      return allCourseStudents.filter(s => !assignedIds.has(s.studentId));
+    }
+
+    // 1. Transfer Student
+    function openTransferModal(fromGroupId, studentId, studentName, fromGroupNum) {
+      document.getElementById('transfer-student-id').value = studentId;
+      document.getElementById('transfer-from-group-id').value = fromGroupId;
+      document.getElementById('transfer-modal-student-name').textContent = `الطالب: ${studentName} (رقم: ${studentId})`;
+      document.getElementById('transfer-current-group-label').textContent = `المجموعة الحالية: رقم (${fromGroupNum})`;
+
+      const cId = state.adminCourseId;
+      const courseGroups = (state.adminData.groups || []).filter(g => g.courseId === cId);
+      const select = document.getElementById('transfer-target-group-select');
+
+      let options = `<option value="">-- اختر المجموعة المستهدفة --</option>`;
+      courseGroups.forEach(g => {
+        if (g.id !== fromGroupId) {
+          options += `<option value="${g.id}">المجموعة رقم (${g.groupNumber}) — عدد الأعضاء حالياً: ${g.members.length} طلاب</option>`;
+        }
+      });
+      options += `<option value="new">+ إنشاء مجموعة جديدة ونقل الطالب إليها فوراً</option>`;
+
+      select.innerHTML = options;
+      document.getElementById('admin-transfer-modal').classList.remove('hidden');
+    }
+
+    function closeTransferModal() {
+      document.getElementById('admin-transfer-modal').classList.add('hidden');
+    }
+
+    async function confirmTransferStudent() {
+      const studentId = document.getElementById('transfer-student-id').value;
+      const fromGroupId = document.getElementById('transfer-from-group-id').value;
+      const toGroupId = document.getElementById('transfer-target-group-select').value;
+
+      if (!toGroupId) return showToast('يرجى اختيار المجموعة المستهدفة أو إنشاء مجموعة جديدة', 'warning');
+
+      try {
+        const res = await fetch('/api/admin/move-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: state.adminToken, studentId, fromGroupId, toGroupId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر نقل الطالب');
+
+        showToast('تم نقل الطالب بنجاح وتحديث المجموعات', 'success');
+        closeTransferModal();
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 2. Remove Student from Group
+    async function removeStudentAdmin(groupId, studentId, studentName) {
+      if (!confirm(`هل ترغب في إخراج الطالب (${studentName}) من هذه المجموعة وإعادته إلى قائمة الطلاب غير المنضمين؟`)) return;
+
+      try {
+        const res = await fetch('/api/admin/remove-student-from-group', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: state.adminToken, groupId, studentId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر إخراج الطالب');
+
+        showToast('تم إخراج الطالب من المجموعة بنجاح', 'info');
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 3. Set Group Leader
+    async function setLeaderAdmin(groupId, studentId) {
+      try {
+        const res = await fetch('/api/admin/set-leader', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: state.adminToken, groupId, studentId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر تغيير قائد المجموعة');
+
+        showToast('تم تعيين القائد الجديد للمجموعة بنجاح', 'success');
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 4. Add Student to Group Modal
+    function openAddStudentModalAdmin(groupId, groupNumber) {
+      document.getElementById('add-student-target-group-id').value = groupId;
+      document.getElementById('add-student-modal-title').textContent = `إضافة طالب إلى المجموعة رقم (${groupNumber})`;
+      document.getElementById('add-student-search-input').value = '';
+      document.getElementById('admin-add-student-modal').classList.remove('hidden');
+      filterAddStudentCandidates();
+    }
+
+    function closeAddStudentModal() {
+      document.getElementById('admin-add-student-modal').classList.add('hidden');
+    }
+
+    function filterAddStudentCandidates() {
+      const q = (document.getElementById('add-student-search-input').value || '').trim().toLowerCase();
+      const listEl = document.getElementById('add-student-candidates-list');
+      const unassigned = getUnassignedStudentsForCurrentCourse();
+      const groupId = document.getElementById('add-student-target-group-id').value;
+
+      const filtered = unassigned.filter(s => {
+        if (!q) return true;
+        return s.name.toLowerCase().includes(q) || s.studentId.includes(q) || (s.track && s.track.toLowerCase().includes(q)) || (s.section && s.section.includes(q));
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="p-4 text-center text-xs text-slate-400 font-bold">لا توجد نتائج مطابقة بين الطلاب غير المنضمين.</div>';
+        return;
+      }
+
+      const jobsMap = state.adminData.studentJobs || {};
+      const phonesMap = state.adminData.studentPhones || {};
+
+      listEl.innerHTML = filtered.slice(0, 50).map(s => `
+        <div class="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between gap-3 text-xs">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900 dark:text-white">${s.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono">رقم: ${s.studentId}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold">شعبة: ${s.section || 'عامة'}</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-0.5">${s.track || 'كلية الدراسات العليا للتربية'}</p>
+            ${phonesMap[s.studentId] || jobsMap[s.studentId] ? `
+              <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-mono">
+                ${phonesMap[s.studentId] ? `<span>هاتف: ${phonesMap[s.studentId]}</span>` : ''}
+                ${jobsMap[s.studentId] ? `<span>وظيفة: ${jobsMap[s.studentId]}</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+          <button type="button" onclick="addStudentToGroupConfirmed('${s.studentId}', '${groupId}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-1 shrink-0">
+            <i class="fa-solid fa-plus text-xs"></i> إضافة
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function addStudentToGroupConfirmed(studentId, groupId) {
+      try {
+        const res = await fetch('/api/admin/add-student-to-group', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: state.adminToken, studentId, groupId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر إضافة الطالب');
+
+        showToast(data.message || 'تمت إضافة الطالب للمجموعة بنجاح', 'success');
+        closeAddStudentModal();
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 5. Create Group Manually Modal
+    function openCreateGroupModalAdmin() {
+      const cId = state.adminCourseId;
+      const courseGroups = (state.adminData.groups || []).filter(g => g.courseId === cId);
+      const nextNum = courseGroups.reduce((max, g) => Math.max(max, g.groupNumber || 0), 0) + 1;
+      document.getElementById('manual-group-number').value = nextNum;
+      document.getElementById('manual-group-approved').checked = true;
+      document.getElementById('manual-group-search-input').value = '';
+      document.getElementById('admin-create-group-modal').classList.remove('hidden');
+      filterManualGroupCandidates();
+    }
+
+    function closeCreateGroupModalAdmin() {
+      document.getElementById('admin-create-group-modal').classList.add('hidden');
+    }
+
+    function filterManualGroupCandidates() {
+      const q = (document.getElementById('manual-group-search-input').value || '').trim().toLowerCase();
+      const listEl = document.getElementById('manual-group-candidates-list');
+      const unassigned = getUnassignedStudentsForCurrentCourse();
+
+      const filtered = unassigned.filter(s => {
+        if (!q) return true;
+        return s.name.toLowerCase().includes(q) || s.studentId.includes(q) || (s.track && s.track.toLowerCase().includes(q)) || (s.section && s.section.includes(q));
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="p-3 text-center text-xs text-slate-400 font-bold">لا يوجد طلاب غير منضمين متطابقين.</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.slice(0, 40).map(s => `
+        <label class="p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-between gap-2 text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" name="manual-group-student" value="${s.studentId}" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+            <div>
+              <span class="font-bold text-slate-800 dark:text-slate-200">${s.name}</span>
+              <span class="text-[10px] text-slate-400 block font-mono">رقم: ${s.studentId} | شعبة: ${s.section || 'عامة'}</span>
+            </div>
+          </div>
+        </label>
+      `).join('');
+    }
+
+    async function confirmCreateGroupAdmin() {
+      const cId = state.adminCourseId;
+      const groupNum = document.getElementById('manual-group-number').value;
+      const isApproved = document.getElementById('manual-group-approved').checked;
+      const checkedBoxes = document.querySelectorAll('input[name="manual-group-student"]:checked');
+      const memberIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+      try {
+        const res = await fetch('/api/admin/create-group', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: state.adminToken,
+            courseId: cId,
+            groupNumber: groupNum,
+            memberIds,
+            isApproved
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر إنشاء المجموعة');
+
+        showToast(data.message || 'تم إنشاء المجموعة وتثبيتها بنجاح', 'success');
+        closeCreateGroupModalAdmin();
+        await loadAdminData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 6. Unassigned Students Explorer Modal
+    function openUnassignedModalAdmin() {
+      document.getElementById('unassigned-search-input').value = '';
+      document.getElementById('admin-unassigned-modal').classList.remove('hidden');
+      filterUnassignedStudents();
+    }
+
+    function closeUnassignedModalAdmin() {
+      document.getElementById('admin-unassigned-modal').classList.add('hidden');
+    }
+
+    function filterUnassignedStudents() {
+      const q = (document.getElementById('unassigned-search-input').value || '').trim().toLowerCase();
+      const listEl = document.getElementById('unassigned-students-list');
+      const unassigned = getUnassignedStudentsForCurrentCourse();
+      const badge = document.getElementById('unassigned-modal-count-badge');
+      if (badge) badge.textContent = `${unassigned.length} طالب`;
+
+      const cId = state.adminCourseId;
+      const courseGroups = (state.adminData.groups || []).filter(g => g.courseId === cId);
+
+      const filtered = unassigned.filter(s => {
+        if (!q) return true;
+        return s.name.toLowerCase().includes(q) || s.studentId.includes(q) || (s.track && s.track.toLowerCase().includes(q)) || (s.section && s.section.includes(q));
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="p-8 text-center text-xs text-slate-400 font-bold">لا يوجد طلاب غير منضمين حالياً مطابقين للبحث. كل الطلاب مسكنون في مجموعات!</div>';
+        return;
+      }
+
+      const jobsMap = state.adminData.studentJobs || {};
+      const phonesMap = state.adminData.studentPhones || {};
+
+      listEl.innerHTML = filtered.slice(0, 100).map(s => `
+        <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900 dark:text-white text-sm">${s.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono">رقم: ${s.studentId}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold">شعبة: ${s.section || 'عامة'}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">${s.track || 'كلية الدراسات العليا للتربية'}</p>
+            ${phonesMap[s.studentId] || jobsMap[s.studentId] ? `
+              <div class="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-mono">
+                ${phonesMap[s.studentId] ? `<span class="text-emerald-600 font-bold"><i class="fa-brands fa-whatsapp ml-1"></i> ${phonesMap[s.studentId]}</span>` : ''}
+                ${jobsMap[s.studentId] ? `<span class="text-slate-600 dark:text-slate-300"><i class="fa-solid fa-briefcase ml-1"></i> ${jobsMap[s.studentId]}</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <select id="assign-group-sel-${s.studentId}" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-sans">
+              <option value="">-- تسكين في مجموعة --</option>
+              ${courseGroups.map(g => `<option value="${g.id}">المجموعة (${g.groupNumber}) [${g.members.length} طلاب]</option>`).join('')}
+              <option value="new">+ إنشاء مجموعة جديدة له</option>
+            </select>
+            <button type="button" onclick="assignUnassignedStudent('${s.studentId}')" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition shadow-sm">
+              تسكين
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function assignUnassignedStudent(studentId) {
+      const select = document.getElementById(`assign-group-sel-${studentId}`);
+      const groupId = select ? select.value : '';
+      if (!groupId) return showToast('يرجى اختيار المجموعة المراد تسكين الطالب بها', 'warning');
+
+      if (groupId === 'new') {
+        try {
+          const res = await fetch('/api/admin/create-group', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token: state.adminToken,
+              courseId: state.adminCourseId,
+              leaderId: studentId,
+              isApproved: true
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'تعذر إنشاء المجموعة');
+          showToast('تم إنشاء مجموعة جديدة وتسكين الطالب قائداً لها', 'success');
+          await loadAdminData();
+          filterUnassignedStudents();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      } else {
+        await addStudentToGroupConfirmed(studentId, groupId);
+        filterUnassignedStudents();
+      }
     }
 
     // --- Excel Template Download & Bulk Import ---
