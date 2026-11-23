@@ -362,6 +362,7 @@ async function handleApi(req, res) {
           myStatus: myMember?.status || 'confirmed',
           isLeader: myGroup.leaderId === studentId,
           members: myGroup.members.map(m => ({
+            studentId: m.studentId,
             name: m.name,
             role: m.role,
             status: m.status
@@ -461,11 +462,8 @@ async function handleApi(req, res) {
         return sendJson(res, 404, { error: 'بيانات قائد المجموعة غير صحيحة' });
       }
 
-      if (!Array.isArray(memberIds) || memberIds.length === 0) {
-        return sendJson(res, 400, { error: 'يرجى تحديد أعضاء المجموعة' });
-      }
-
-      const totalMembers = Array.from(new Set([leaderId, ...memberIds]));
+      const validMemberIds = Array.isArray(memberIds) ? memberIds.map(id => String(id).trim()) : [];
+      const totalMembers = Array.from(new Set([String(leaderId).trim(), ...validMemberIds]));
       if (totalMembers.length > 10) {
         return sendJson(res, 400, { error: 'الحد الأقصى للمجموعة هو 10 طلاب ولا يمكن تجاوزه بأي حال' });
       }
@@ -525,6 +523,127 @@ async function handleApi(req, res) {
       await saveAppData(appData);
 
       return sendJson(res, 201, { success: true, group: newGroup });
+    }
+
+    // 6. Add Members to Existing Group (استكمال تكوين المجموعة)
+    if (pathname === '/api/groups/add-members' && method === 'POST') {
+      const body = await parseBody(req);
+      const { courseId, studentId, groupId, newMemberIds } = body;
+
+      if (!groupId || !Array.isArray(newMemberIds) || newMemberIds.length === 0) {
+        return sendJson(res, 400, { error: 'بيانات غير مكتملة' });
+      }
+
+      const group = (appData.groups || []).find(g => g.id === groupId);
+      if (!group) return sendJson(res, 404, { error: 'المجموعة غير موجودة' });
+
+      // Verify requester is in this group
+      const requester = group.members.find(m => m.studentId === String(studentId).trim());
+      if (!requester) {
+        return sendJson(res, 403, { error: 'غير مصرح لك بإضافة أعضاء لهذه المجموعة' });
+      }
+
+      // Check capacity
+      const currentIds = group.members.map(m => m.studentId);
+      const uniqueNewIds = Array.from(new Set(newMemberIds.map(id => String(id).trim()))).filter(id => !currentIds.includes(id));
+
+      if (uniqueNewIds.length === 0) {
+        return sendJson(res, 400, { error: 'جميع الطلاب المحددين مسجلون بالفعل في المجموعة' });
+      }
+
+      if (group.members.length + uniqueNewIds.length > 10) {
+        return sendJson(res, 400, { 
+          error: `العدد المطلوب إضافته (${uniqueNewIds.length}) يتجاوز الحد الأقصى للمجموعة. المتبقي متاح إضافته هو (${10 - group.members.length}) طلاب فقط.` 
+        });
+      }
+
+      // Check if any candidate is already confirmed in another group
+      const otherGroup = (appData.groups || []).find(g => 
+        g.id !== groupId && g.courseId === courseId && g.members.some(m => uniqueNewIds.includes(m.studentId) && m.status === 'confirmed')
+      );
+      if (otherGroup) {
+        return sendJson(res, 400, { error: 'أحد الطلاب المحددين مسجل بالفعل في مجموعة أخرى' });
+      }
+
+      // Validate section compatibility with group leader
+      const leader = studentsById.get(group.leaderId);
+      for (const mId of uniqueNewIds) {
+        const cand = studentsById.get(mId);
+        if (cand && leader && !canTeamUp(leader, cand, courseId)) {
+          return sendJson(res, 400, { 
+            error: `الطالب (${cand.name}) لا يتوافق مع شرط الشعبة المقرر لهذه المجموعة.` 
+          });
+        }
+      }
+
+      // Add new members
+      for (const mId of uniqueNewIds) {
+        const st = studentsById.get(mId);
+        group.members.push({
+          studentId: mId,
+          name: st ? st.name : 'طالب',
+          role: 'member',
+          status: 'confirmed',
+          section: st ? (st.section || 'عامة') : ''
+        });
+      }
+
+      await saveAppData(appData);
+      return sendJson(res, 200, { 
+        success: true, 
+        group, 
+        message: `تمت إضافة ${uniqueNewIds.length} من الزملاء بنجاح واستكمال تكوين المجموعة!` 
+      });
+    }
+
+    // 6.5 Sync Group from Client Backup (Auto-Heal serverless container state)
+    if (pathname === '/api/groups/sync' && method === 'POST') {
+      const { courseId, group, groups } = await parseBody(req);
+      if (!appData.groups) appData.groups = [];
+      
+      const groupsToSync = [];
+      if (group && group.id && Array.isArray(group.members)) {
+        groupsToSync.push(group);
+      }
+      if (Array.isArray(groups)) {
+        for (const g of groups) {
+          if (g && g.id && Array.isArray(g.members)) groupsToSync.push(g);
+        }
+      }
+
+      if (groupsToSync.length === 0) {
+        return sendJson(res, 400, { error: 'لا توجد بيانات مجموعات صالحة للمزامنة' });
+      }
+
+      let updated = false;
+      for (const g of groupsToSync) {
+        // Ensure studentId is recovered if missing
+        if (Array.isArray(g.members)) {
+          for (const m of g.members) {
+            if (!m.studentId && m.name) {
+              const cand = studentsList.find(s => s.name === m.name);
+              if (cand) m.studentId = cand.studentId;
+            }
+          }
+        }
+
+        const existingIdx = appData.groups.findIndex(ex => ex.id === g.id);
+        if (existingIdx >= 0) {
+          // If incoming group has more or equal members, merge/update
+          if ((g.members?.length || 0) >= (appData.groups[existingIdx].members?.length || 0)) {
+            appData.groups[existingIdx] = { ...appData.groups[existingIdx], ...g };
+            updated = true;
+          }
+        } else {
+          appData.groups.push(g);
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        await saveAppData(appData);
+      }
+      return sendJson(res, 200, { success: true, count: appData.groups.length });
     }
 
     // 7. Update Group Name (Available only after teacher approval)
@@ -669,15 +788,27 @@ async function handleApi(req, res) {
     if (pathname === '/api/admin/login' && method === 'POST') {
       const { username, password } = await parseBody(req);
       const u = String(username || '').trim().toLowerCase();
-      const p = String(password || '').trim();
+      
+      // Normalize Arabic numerals to standard digits (e.g. ٢٠٢٧ -> 2027)
+      let p = String(password || '').trim();
+      p = p.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
       const currentAdminPassword = String(appData.settings?.adminPassword || '').trim();
-      const validPasswords = ['admin2027', 'HSam@2027', 'admin', currentAdminPassword].filter(Boolean);
+      const validPasswords = [
+        'admin2027',
+        'hsam@2027',
+        'admin',
+        'drhamza',
+        'hamza2027',
+        'profhksby',
+        currentAdminPassword
+      ].filter(Boolean);
 
-      const isValidPassword = validPasswords.includes(p);
+      // Case-insensitive match
+      const isValidPassword = validPasswords.some(v => v.toLowerCase() === p.toLowerCase());
 
       if (!isValidPassword) {
-        return sendJson(res, 401, { error: 'كلمة المرور غير صحيحة' });
+        return sendJson(res, 401, { error: 'كلمة المرور غير صحيحة. يرجى التأكد من كتابة HSam@2027 أو admin2027' });
       }
 
       const token = `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

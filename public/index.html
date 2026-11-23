@@ -125,10 +125,11 @@
           <i id="theme-icon" class="fa-solid fa-moon"></i>
         </button>
 
-        <!-- Admin Access Button (Icon Only) -->
-        <button id="nav-admin-btn" onclick="openAdminModal()" title="أستاذ المقرر"
-          class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center justify-center text-base border border-slate-200/70 dark:border-slate-700 shadow-sm">
+        <!-- Admin Access Button -->
+        <button id="nav-admin-btn" onclick="openAdminModal()" title="دخول أستاذ المقرر (لوحة التحكم)"
+          class="px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center gap-1.5 text-xs font-bold border border-slate-200/70 dark:border-slate-700 shadow-sm">
           <i class="fa-solid fa-user-tie text-emerald-600 dark:text-emerald-400"></i>
+          <span>أستاذ المقرر</span>
         </button>
 
         <!-- Student Logout Button (Hidden by default) -->
@@ -286,6 +287,14 @@
             </button>
 
           </form>
+
+          <!-- Professor Login Link -->
+          <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button type="button" onclick="openAdminModal()" class="text-xs font-bold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition inline-flex items-center gap-2">
+              <i class="fa-solid fa-user-tie text-emerald-600"></i>
+              <span>بوابة دخول أستاذ المقرر (د. حمزة محمد القصبي)</span>
+            </button>
+          </div>
 
         </div>
       </div>
@@ -610,6 +619,73 @@
     </section>
 
   </main>
+
+  <!-- ================= COMPLETE GROUP FORMATION MODAL (استكمال تكوين المجموعة) ================= -->
+  <div id="complete-group-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white" id="complete-modal-title">استكمال تكوين المجموعة</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="complete-modal-subtitle">
+              ابحث عن الزملاء لإضافتهم للمجموعة حتى اكتمال 10 طلاب كحد أقصى.
+            </p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCompleteGroupModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Capacity Info Pill -->
+      <div id="complete-capacity-pill" class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-users text-emerald-600"></i>
+          <span id="complete-capacity-text">حجم المجموعة حالياً: 3 من 10 طلاب</span>
+        </div>
+        <span id="complete-remaining-badge" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-[11px]">متاح إضافة 7 طلاب</span>
+      </div>
+
+      <!-- Search Section -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">ابحث عن الزميل بالاسم أو رقم الطالب:</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input type="text" id="complete-group-search-input" oninput="handleCompleteGroupSearch(this.value)" placeholder="اكتب اسم الزميل أو رقمه للبحث..."
+            class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+        </div>
+        <!-- Search Results Dropdown -->
+        <div id="complete-search-results" class="max-h-40 overflow-y-auto space-y-1.5 hidden border border-slate-200 dark:border-slate-700 rounded-xl p-2 bg-slate-50 dark:bg-slate-800/60"></div>
+      </div>
+
+      <!-- Selected New Members -->
+      <div class="flex-1 overflow-y-auto space-y-2">
+        <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+          <span>الزملاء المطلوب إضافتهم الآن:</span>
+          <span id="complete-selected-count" class="text-emerald-600 font-bold text-xs">0 طالب</span>
+        </div>
+        <div id="complete-selected-list" class="space-y-1.5 min-h-[60px] p-2 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700 text-center flex flex-col justify-center">
+          <span class="text-slate-400 text-xs">لم يتم اختيار زملاء جدد بعد. ابحث بالأعلى واضغط على اسم الزميل لاختياره.</span>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button type="button" id="confirm-complete-btn" onclick="confirmAddMembersToGroup()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>تأكيد إضافة الزملاء للمجموعة</span>
+        </button>
+        <button type="button" onclick="closeCompleteGroupModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ================= ADMIN LOGIN MODAL ================= -->
   <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden animate-in fade-in duration-200">
@@ -1163,13 +1239,35 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // --- Save Known Group to LocalStorage ---
+    function saveKnownGroupToLocal(group) {
+      if (!group || !group.id) return;
+      try {
+        const key = `academic_all_groups_${group.courseId || 'elearning'}`;
+        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+        const idx = existing.findIndex(g => g.id === group.id);
+        if (idx >= 0) {
+          if ((group.members?.length || 0) >= (existing[idx].members?.length || 0)) {
+            existing[idx] = group;
+          }
+        } else {
+          existing.push(group);
+        }
+        localStorage.setItem(key, JSON.stringify(existing));
+      } catch(e) {}
+    }
+
     // --- Student Login Handler (Strictly Privacy-Preserving) ---
     async function handleStudentLogin(e) {
       e.preventDefault();
-      const studentId = document.getElementById('login-student-id').value.trim();
-      const phone = document.getElementById('login-phone').value.trim();
-      const job = document.getElementById('login-job').value.trim();
+      let studentId = document.getElementById('login-student-id').value.trim();
+      let phone = document.getElementById('login-phone').value.trim();
+      let job = document.getElementById('login-job').value.trim();
       const courseId = document.querySelector('input[name="loginCourse"]:checked').value;
+
+      // Normalize Arabic numerals (e.g. ٣٠٠٢٦... -> 30026...)
+      studentId = studentId.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+      phone = phone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
       if (!studentId) return showToast('يرجى إدخال رقم الطالب', 'warning');
       if (!phone) return showToast('يرجى إدخال رقم الواتساب', 'warning');
@@ -1195,6 +1293,10 @@
         state.courseId = courseId;
         state.pendingMembers = [];
 
+        try {
+          localStorage.setItem('academic_student_session', JSON.stringify({ student: data.student, courseId }));
+        } catch(e) {}
+
         showToast(`مرحباً بك يا ${state.student.name}`, 'success');
         await loadWorkspaceData();
         navigate('workspace');
@@ -1208,6 +1310,9 @@
     }
 
     function logoutStudent() {
+      try {
+        localStorage.removeItem('academic_student_session');
+      } catch(e) {}
       state.student = null;
       state.courseData = null;
       state.pendingMembers = [];
@@ -1217,11 +1322,44 @@
     // --- Workspace Data Loader ---
     async function loadWorkspaceData() {
       try {
+        // Auto-heal group state from localStorage if available
+        const localGroupKey = `academic_student_group_${state.courseId}_${state.student.studentId}`;
+        const cachedGroupStr = localStorage.getItem(localGroupKey);
+        if (cachedGroupStr) {
+          try {
+            const cachedGroup = JSON.parse(cachedGroupStr);
+            if (cachedGroup && cachedGroup.id) {
+              await fetch('/api/groups/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: state.courseId, group: cachedGroup })
+              });
+            }
+          } catch(e) {}
+        }
+
         const res = await fetch(`/api/course-data?courseId=${state.courseId}&studentId=${state.student.studentId}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'تعذر تحميل بيانات المقرر');
 
         state.courseData = data;
+
+        if (data.myGroup) {
+          localStorage.setItem(localGroupKey, JSON.stringify(data.myGroup));
+          saveKnownGroupToLocal(data.myGroup);
+        } else if (cachedGroupStr && !state._autoSyncedOnce) {
+          state._autoSyncedOnce = true;
+          try {
+            const cachedGroup = JSON.parse(cachedGroupStr);
+            await fetch('/api/groups/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ courseId: state.courseId, group: cachedGroup })
+            });
+            return loadWorkspaceData();
+          } catch(e) {}
+        }
+
         renderWorkspaceUI();
       } catch (err) {
         showToast(err.message, 'error');
@@ -1300,13 +1438,19 @@
                   <i class="fa-solid fa-users"></i>
                 </span>
                 <div>
-                  <span class="font-bold">حجم المجموعة حالياً: ${count} من 10 طلاب.</span>
+                  <span class="font-bold text-sm">حجم المجموعة حالياً: ${count} من 10 طلاب (متاح إضافة ${10 - count} زملاء).</span>
                   <p class="text-[11px] text-sky-700 dark:text-sky-300 mt-0.5">
-                    تنبيه: المجموعة صالحة ونظامية؛ فالنظام يعتمد المجموعات المكونة من 10 طلاب أو أقل، ويمكن اعتمادها مباشرة من أستاذ المقرر دون اشتراط وصولها للحد الأقصى.
+                    يمكنكم الآن أو لاحقاً الضغط على زر "استكمال تكوين المجموعة" لإضافة باقي الزملاء حتى 10 طلاب، أو الانتظار حتى يعتمد أستاذ المقرر المجموعة بهذا العدد.
                   </p>
                 </div>
               </div>
-              <span class="px-3 py-1 bg-sky-200 dark:bg-sky-900/60 font-bold rounded-lg text-sky-900 dark:text-sky-200 shrink-0">${count} / 10 طلاب</span>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="openCompleteGroupModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-user-plus text-xs"></i>
+                  <span>استكمال تكوين المجموعة</span>
+                </button>
+                <span class="px-3 py-1 bg-sky-200 dark:bg-sky-900/60 font-bold rounded-lg text-sky-900 dark:text-sky-200 shrink-0">${count} / 10 طلاب</span>
+              </div>
             </div>
           `;
         }
@@ -1337,9 +1481,18 @@
         subtitleEl.innerHTML = `قائد المجموعة: <strong>${myGroup.leaderName}</strong> | عدد الأعضاء: <strong>${myGroup.members.length}</strong> من 10${createdText}`;
 
         let actionBtns = '';
+        const canComplete = myGroup.members.length < 10;
+        const completeBtn = canComplete ? `
+          <button onclick="openCompleteGroupModal()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-user-plus text-xs"></i>
+            <span>استكمال تكوين المجموعة (+${10 - myGroup.members.length} متاح)</span>
+          </button>
+        ` : '';
+
         if (myGroup.isApprovedByTeacher) {
           actionBtns = `
             <div class="flex items-center gap-2 flex-wrap">
+              ${completeBtn}
               <button onclick="openStudentGroupNameModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:hover:bg-teal-900 text-teal-700 dark:text-teal-300 transition flex items-center gap-1.5 border border-teal-200/60 dark:border-teal-800 shadow-sm">
                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                 <span>${myGroup.groupName ? 'تعديل اسم المجموعة' : 'تسمية المجموعة'}</span>
@@ -1352,6 +1505,7 @@
         } else {
           actionBtns = `
             <div class="flex items-center gap-2 flex-wrap">
+              ${completeBtn}
               <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 flex items-center gap-1">
                 <i class="fa-solid fa-hourglass-half text-[10px]"></i> قيد المراجعة
               </span>
@@ -1625,7 +1779,9 @@
     // --- Submit Group Formation ---
     async function submitGroupFormation() {
       if (state.pendingMembers.length === 0) {
-        return showToast('يرجى إضافة زميل واحد على الأقل للمجموعة قبل التأكيد', 'warning');
+        if (!confirm('هل ترغب في بدء تشكيل المجموعة منفرداً الآن كقائد، واستكمال إضافة باقي الزملاء لاحقاً عبر زر (استكمال تكوين المجموعة)؟')) {
+          return;
+        }
       }
 
       const btn = document.getElementById('submit-formation-btn');
@@ -1645,7 +1801,12 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'تعذر تشكيل المجموعة');
 
-        showToast('تم تشكيل المجموعة بنجاح وإرسال الدعوات للأعضاء!', 'success');
+        if (data.group) {
+          localStorage.setItem(`academic_student_group_${state.courseId}_${state.student.studentId}`, JSON.stringify(data.group));
+          saveKnownGroupToLocal(data.group);
+        }
+
+        showToast('تم تشكيل وتثبيت المجموعة بنجاح! يمكنك استكمال إضافة باقي الزملاء في أي وقت.', 'success');
         state.pendingMembers = [];
         await loadWorkspaceData();
 
@@ -1654,6 +1815,168 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>تأكيد واعتماد تشكيل المجموعة رسمياً</span>';
+      }
+    }
+
+    // --- Complete Group Formation (استكمال تكوين المجموعة) ---
+    state.pendingCompleteMembers = [];
+
+    function openCompleteGroupModal() {
+      if (!state.courseData || !state.courseData.myGroup) return;
+      const myGroup = state.courseData.myGroup;
+      const currentCount = myGroup.members.length;
+      const remaining = 10 - currentCount;
+
+      if (remaining <= 0) {
+        return showToast('المجموعة مكتملة بالفعل بالحد الأقصى (10 طلاب)', 'info');
+      }
+
+      state.pendingCompleteMembers = [];
+      document.getElementById('complete-modal-title').textContent = `استكمال تكوين المجموعة رقم (${myGroup.groupNumber})`;
+      document.getElementById('complete-capacity-text').textContent = `حجم المجموعة حالياً: ${currentCount} من 10 طلاب`;
+      document.getElementById('complete-remaining-badge').textContent = `متاح إضافة ${remaining} طلاب`;
+      document.getElementById('complete-group-search-input').value = '';
+      document.getElementById('complete-search-results').classList.add('hidden');
+      document.getElementById('complete-search-results').innerHTML = '';
+      renderCompleteSelectedList();
+
+      document.getElementById('complete-group-modal').classList.remove('hidden');
+    }
+
+    function closeCompleteGroupModal() {
+      document.getElementById('complete-group-modal').classList.add('hidden');
+      state.pendingCompleteMembers = [];
+    }
+
+    let completeSearchTimer = null;
+    function handleCompleteGroupSearch(val) {
+      clearTimeout(completeSearchTimer);
+      const q = val.trim();
+      const resContainer = document.getElementById('complete-search-results');
+      if (q.length < 2) {
+        resContainer.classList.add('hidden');
+        resContainer.innerHTML = '';
+        return;
+      }
+
+      completeSearchTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/student/search-peers?courseId=${state.courseId}&studentId=${state.student.studentId}&q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+
+          const existingInGroup = new Set(state.courseData.myGroup.members.map(m => m.name));
+          const pendingIds = new Set(state.pendingCompleteMembers.map(m => m.studentId));
+          
+          const filtered = (data.results || []).filter(s => !existingInGroup.has(s.name) && !pendingIds.has(s.studentId));
+
+          if (filtered.length === 0) {
+            resContainer.innerHTML = '<div class="p-2 text-center text-xs text-slate-400">لا توجد نتائج مطابقة، أو أن الزميل مسجل في مجموعة أخرى أو غير متوافق.</div>';
+            resContainer.classList.remove('hidden');
+            return;
+          }
+
+          resContainer.innerHTML = filtered.map(st => `
+            <div onclick='addMemberToCompleteGroup(${JSON.stringify(st).replace(/'/g, "&apos;")})'
+              class="p-2 rounded-lg bg-white dark:bg-slate-700/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/60 dark:border-slate-700 cursor-pointer flex items-center justify-between text-xs transition">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-emerald-600"></i>
+                <span class="font-bold text-slate-800 dark:text-slate-100">${st.name}</span>
+              </div>
+              <span class="text-[10px] text-slate-400">${st.track || ''}</span>
+            </div>
+          `).join('');
+          resContainer.classList.remove('hidden');
+        } catch(err) {
+          console.error(err);
+        }
+      }, 250);
+    }
+
+    function addMemberToCompleteGroup(st) {
+      const currentCount = state.courseData.myGroup.members.length;
+      const maxAdd = 10 - currentCount;
+
+      if (state.pendingCompleteMembers.length >= maxAdd) {
+        return showToast(`لا يمكن إضافة أكثر من ${maxAdd} طلاب لاستكمال الحد الأقصى للمجموعة`, 'warning');
+      }
+
+      if (state.pendingCompleteMembers.some(m => m.studentId === st.studentId)) {
+        return showToast('هذا الزميل محدد بالفعل في القائمة', 'info');
+      }
+
+      state.pendingCompleteMembers.push(st);
+      renderCompleteSelectedList();
+      
+      document.getElementById('complete-group-search-input').value = '';
+      document.getElementById('complete-search-results').classList.add('hidden');
+    }
+
+    function removeMemberFromCompleteGroup(studentId) {
+      state.pendingCompleteMembers = state.pendingCompleteMembers.filter(m => m.studentId !== studentId);
+      renderCompleteSelectedList();
+    }
+
+    function renderCompleteSelectedList() {
+      const listEl = document.getElementById('complete-selected-list');
+      const countEl = document.getElementById('complete-selected-count');
+      countEl.textContent = `${state.pendingCompleteMembers.length} طالب`;
+
+      if (state.pendingCompleteMembers.length === 0) {
+        listEl.innerHTML = `<span class="text-slate-400 text-xs">لم يتم اختيار زملاء جدد بعد. ابحث بالأعلى واضغط على اسم الزميل لاختياره.</span>`;
+        return;
+      }
+
+      listEl.innerHTML = state.pendingCompleteMembers.map(st => `
+        <div class="p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-user-check text-emerald-500"></i>
+            <span class="font-bold text-slate-800 dark:text-white">${st.name}</span>
+          </div>
+          <button type="button" onclick="removeMemberFromCompleteGroup('${st.studentId}')" class="text-rose-500 hover:text-rose-700 p-1 text-xs" title="حذف">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function confirmAddMembersToGroup() {
+      if (state.pendingCompleteMembers.length === 0) {
+        return showToast('يرجى اختيار زميل واحد على الأقل لإضافته للمجموعة', 'warning');
+      }
+
+      const btn = document.getElementById('confirm-complete-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إضافة الأعضاء...';
+
+      try {
+        const res = await fetch('/api/groups/add-members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: state.courseId,
+            studentId: state.student.studentId,
+            groupId: state.courseData.myGroup.id,
+            newMemberIds: state.pendingCompleteMembers.map(m => m.studentId)
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'تعذر إضافة الأعضاء للمجموعة');
+
+        showToast(data.message || 'تمت إضافة الزملاء بنجاح واستكمال تكوين المجموعة!', 'success');
+        closeCompleteGroupModal();
+        
+        if (data.group) {
+          localStorage.setItem(`academic_student_group_${state.courseId}_${state.student.studentId}`, JSON.stringify(data.group));
+          saveKnownGroupToLocal(data.group);
+        }
+        await loadWorkspaceData();
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>تأكيد إضافة الزملاء للمجموعة</span>';
       }
     }
 
@@ -1870,9 +2193,19 @@
 
         // --- Admin Authentication & Controls ---
     function openAdminModal() {
+      // If already logged in with valid token, navigate directly
+      if (state.adminToken) {
+        navigate('admin');
+        loadAdminData();
+        return;
+      }
       document.getElementById('admin-modal').classList.remove('hidden');
       document.getElementById('admin-username-input').value = 'drhamza';
       document.getElementById('admin-password-input').value = '';
+      setTimeout(() => {
+        const pwdInput = document.getElementById('admin-password-input');
+        if (pwdInput) pwdInput.focus();
+      }, 100);
     }
 
     function closeAdminModal() {
@@ -1893,8 +2226,18 @@
 
     async function handleAdminLogin(e) {
       e.preventDefault();
-      const username = document.getElementById('admin-username-input').value.trim();
-      const password = document.getElementById('admin-password-input').value.trim();
+      let username = document.getElementById('admin-username-input').value.trim();
+      let password = document.getElementById('admin-password-input').value.trim();
+
+      // Normalize Arabic numerals
+      username = username.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+      password = password.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+      }
 
       try {
         const res = await fetch('/api/admin/login', {
@@ -1906,6 +2249,7 @@
         if (!res.ok) throw new Error(data.error || 'فشل تسجيل الدخول');
 
         state.adminToken = data.token;
+        localStorage.setItem('academic_admin_token', data.token);
         closeAdminModal();
         showToast('مرحباً بكم يا دكتور حمزة محمد القصبي', 'success');
         await loadAdminData();
@@ -1913,10 +2257,16 @@
 
       } catch (err) {
         showToast(err.message, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'دخول لوحة التحكم';
+        }
       }
     }
 
     function logoutAdmin() {
+      localStorage.removeItem('academic_admin_token');
       state.adminToken = null;
       state.adminData = null;
       navigate('home');
@@ -1924,11 +2274,43 @@
 
     async function loadAdminData() {
       try {
+        // Auto-heal / sync any groups from admin localStorage
+        const cId = state.adminCourseId;
+        const cachedKey = `academic_all_groups_${cId}`;
+        const cachedGroupsStr = localStorage.getItem(cachedKey);
+        if (cachedGroupsStr) {
+          try {
+            const parsed = JSON.parse(cachedGroupsStr);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              await fetch('/api/groups/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: cId, groups: parsed })
+              });
+            }
+          } catch(e) {}
+        }
+
         const res = await fetch(`/api/admin/data?token=${state.adminToken}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'تعذر تحميل بيانات لوحة التحكم');
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('academic_admin_token');
+            state.adminToken = null;
+          }
+          throw new Error(data.error || 'تعذر تحميل بيانات لوحة التحكم');
+        }
 
         state.adminData = data;
+
+        // Persist admin groups in localStorage
+        if (data.groups && Array.isArray(data.groups)) {
+          const elGroups = data.groups.filter(g => g.courseId === 'elearning');
+          const ctGroups = data.groups.filter(g => g.courseId === 'critical_thinking');
+          localStorage.setItem('academic_all_groups_elearning', JSON.stringify(elGroups));
+          localStorage.setItem('academic_all_groups_critical_thinking', JSON.stringify(ctGroups));
+        }
+
         renderAdminDashboard();
       } catch (err) {
         showToast(err.message, 'error');
@@ -2817,8 +3199,29 @@
     }
 
     // --- Startup Initialization ---
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
+
+      // Check stored admin token
+      const savedAdminToken = localStorage.getItem('academic_admin_token');
+      if (savedAdminToken) {
+        state.adminToken = savedAdminToken;
+      }
+
+      // Check stored student session
+      const savedStudentSession = localStorage.getItem('academic_student_session');
+      if (savedStudentSession) {
+        try {
+          const sess = JSON.parse(savedStudentSession);
+          if (sess && sess.student && sess.courseId) {
+            state.student = sess.student;
+            state.courseId = sess.courseId;
+            state.pendingMembers = [];
+            navigate('workspace');
+            await loadWorkspaceData();
+          }
+        } catch(e) {}
+      }
     });
   </script>
 
